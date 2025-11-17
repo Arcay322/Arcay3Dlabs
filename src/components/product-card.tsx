@@ -27,7 +27,10 @@ export function ProductCard({ product }: ProductCardProps) {
       description: `${product.name} se agregó al carrito`,
     });
   };
-  const mainImage = product.images?.[0] || '/placeholder-product.jpg';
+  
+  // Usar imagen de placeholder de Unsplash si no hay imagen disponible
+  const mainImage = product.images?.[0] || 'https://images.unsplash.com/photo-1635774853448-f733a4c60e4c?w=400';
+  
   const formattedPrice = new Intl.NumberFormat('es-PE', {
     style: 'currency',
     currency: 'USD',

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Product } from '@/lib/firebase/types';
+import { ventifyAPI, VentifyProduct } from '@/lib/ventify-api';
 
 // Mock products data - Usar hasta que Firebase esté configurado
 const MOCK_PRODUCTS: Product[] = [
@@ -171,15 +172,78 @@ const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
+// Función para convertir productos de Ventify al formato local
+function mapVentifyProductToLocal(ventifyProduct: VentifyProduct): Product {
+  // Usar imagen de placeholder de Unsplash si no hay imagen
+  const defaultImage = 'https://images.unsplash.com/photo-1635774853448-f733a4c60e4c?w=400';
+  
+  return {
+    id: ventifyProduct.id,
+    name: ventifyProduct.name,
+    description: ventifyProduct.description || '',
+    price: ventifyProduct.price,
+    category: ventifyProduct.category,
+    material: 'PLA', // Valor por defecto, puede venir de Ventify si lo agregas
+    images: ventifyProduct.imageUrl ? [ventifyProduct.imageUrl] : [defaultImage],
+    stock: ventifyProduct.stock,
+    featured: false, // Se puede agregar lógica para featured
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
 export function useProducts(filters?: { category?: string; featured?: boolean; limitCount?: number }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Simular carga de datos
-    const timer = setTimeout(() => {
+    const fetchProducts = async () => {
       try {
+        setLoading(true);
+        
+        // Intentar obtener productos desde Ventify API
+        if (ventifyAPI.isConfigured()) {
+          const ventifyProducts = await ventifyAPI.getProducts({
+            category: filters?.category,
+            active: true,
+            limit: filters?.limitCount,
+          });
+          
+          // Convertir productos de Ventify al formato local
+          const mappedProducts = ventifyProducts.map(mapVentifyProductToLocal);
+          
+          // Aplicar filtro de featured si es necesario
+          let filtered = mappedProducts;
+          if (filters?.featured !== undefined) {
+            filtered = filtered.filter(p => p.featured === filters.featured);
+          }
+          
+          setProducts(filtered);
+          setLoading(false);
+        } else {
+          // Fallback a datos mock si Ventify no está configurado
+          console.warn('Ventify API no configurada, usando datos mock');
+          let filtered = [...MOCK_PRODUCTS];
+
+          if (filters?.category) {
+            filtered = filtered.filter(p => p.category === filters.category);
+          }
+
+          if (filters?.featured !== undefined) {
+            filtered = filtered.filter(p => p.featured === filters.featured);
+          }
+
+          if (filters?.limitCount) {
+            filtered = filtered.slice(0, filters.limitCount);
+          }
+
+          setProducts(filtered);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error al obtener productos:', err);
+        // En caso de error, usar datos mock como fallback
         let filtered = [...MOCK_PRODUCTS];
 
         if (filters?.category) {
@@ -195,14 +259,12 @@ export function useProducts(filters?: { category?: string; featured?: boolean; l
         }
 
         setProducts(filtered);
-        setLoading(false);
-      } catch (err) {
         setError(err as Error);
         setLoading(false);
       }
-    }, 500); // Simular latencia de red
+    };
 
-    return () => clearTimeout(timer);
+    fetchProducts();
   }, [filters?.category, filters?.featured, filters?.limitCount]);
 
   return { products, loading, error };
@@ -214,19 +276,41 @@ export function useFeaturedProducts(limitCount: number = 4) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Simular carga de datos
-    const timer = setTimeout(() => {
+    const fetchProducts = async () => {
       try {
+        setLoading(true);
+        
+        // Intentar obtener productos desde Ventify API
+        if (ventifyAPI.isConfigured()) {
+          const ventifyProducts = await ventifyAPI.getProducts({
+            active: true,
+            limit: limitCount,
+          });
+          
+          // Convertir y tomar los primeros productos como featured
+          const mappedProducts = ventifyProducts
+            .map(mapVentifyProductToLocal)
+            .slice(0, limitCount);
+          
+          setProducts(mappedProducts);
+          setLoading(false);
+        } else {
+          // Fallback a datos mock
+          const featured = MOCK_PRODUCTS.filter(p => p.featured).slice(0, limitCount);
+          setProducts(featured);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error al obtener productos destacados:', err);
+        // Fallback a datos mock en caso de error
         const featured = MOCK_PRODUCTS.filter(p => p.featured).slice(0, limitCount);
         setProducts(featured);
-        setLoading(false);
-      } catch (err) {
         setError(err as Error);
         setLoading(false);
       }
-    }, 500);
+    };
 
-    return () => clearTimeout(timer);
+    fetchProducts();
   }, [limitCount]);
 
   return { products, loading, error };
