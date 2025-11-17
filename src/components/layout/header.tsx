@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Cube, Menu } from "lucide-react";
+import { Box, Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -40,7 +40,7 @@ export function Header() {
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2" prefetch={false}>
-          <Cube className="h-7 w-7 text-primary" />
+          <Box className="h-7 w-7 text-primary" />
           <span className="font-headline text-2xl font-bold text-foreground">
             Arcay3Dlabs
           </span>
@@ -72,7 +72,7 @@ export function Header() {
           <SheetContent side="right">
             <div className="flex flex-col gap-6 p-6">
               <Link href="/" className="mb-4 flex items-center gap-2" prefetch={false}>
-                <Cube className="h-7 w-7 text-primary" />
+                <Box className="h-7 w-7 text-primary" />
                 <span className="font-headline text-2xl font-bold text-foreground">
                   Arcay3Dlabs
                 </span>
