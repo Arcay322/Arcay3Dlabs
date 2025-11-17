@@ -4,51 +4,122 @@ import { Button } from "@/components/ui/button";
 
 export function Footer() {
   return (
-    <footer id="contacto" className="w-full bg-secondary py-12">
-      <div className="container mx-auto grid grid-cols-1 gap-8 px-4 md:grid-cols-3 md:px-6">
-        <div className="flex flex-col items-start gap-4">
-          <Link href="/" className="flex items-center gap-2" prefetch={false}>
-            <Box className="h-7 w-7 text-primary" />
-            <span className="font-headline text-2xl font-bold text-foreground">
-              Arcay3Dlabs
-            </span>
-          </Link>
-          <p className="text-sm text-muted-foreground">
-            Impresión 3D de precisión para tus ideas más ambiciosas.
-          </p>
-        </div>
-        <div className="grid gap-4">
-          <h4 className="font-headline text-lg font-semibold">Navegación</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <Link href="#inicio" className="text-sm text-muted-foreground hover:text-primary">Inicio</Link>
-            <Link href="#tienda" className="text-sm text-muted-foreground hover:text-primary">Tienda</Link>
-            <Link href="#servicios" className="text-sm text-muted-foreground hover:text-primary">Servicios</Link>
-            <Link href="#materiales" className="text-sm text-muted-foreground hover:text-primary">Materiales</Link>
-            <Link href="#galeria" className="text-sm text-muted-foreground hover:text-primary">Galería</Link>
-          </div>
-        </div>
-        <div className="grid gap-4">
-          <h4 className="font-headline text-lg font-semibold">Contacto y Redes</h4>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="#" target="_blank"><Instagram className="h-5 w-5" /></Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="#" target="_blank"><Linkedin className="h-5 w-5" /></Link>
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Email: <a href="mailto:contacto@arcay3dlabs.com" className="underline hover:text-primary">contacto@arcay3dlabs.com</a>
-          </p>
-        </div>
-      </div>
-      <div className="container mx-auto mt-8 border-t pt-6 px-4 md:px-6">
-        <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
-            <p>&copy; {new Date().getFullYear()} Arcay3Dlabs. Todos los derechos reservados.</p>
-            <div className="flex gap-4">
-                <Link href="#" className="hover:text-primary">Política de Privacidad</Link>
-                <Link href="#" className="hover:text-primary">Términos de Servicio</Link>
+    <footer id="contacto" className="w-full bg-gradient-to-b from-secondary to-background border-t border-border/50">
+      <div className="container mx-auto py-12 px-4 md:px-6">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+          {/* Brand Section */}
+          <div className="flex flex-col items-start gap-4 md:col-span-2">
+            <Link href="/" className="flex items-center gap-2 group" prefetch={false}>
+              <div className="relative">
+                <Box className="h-8 w-8 text-primary transition-transform group-hover:rotate-12 duration-300" />
+                <div className="absolute inset-0 blur-md bg-primary/20 group-hover:bg-primary/40 transition-all duration-300" />
+              </div>
+              <span className="font-headline text-2xl font-bold text-foreground">
+                Arcay3D<span className="gradient-text">labs</span>
+              </span>
+            </Link>
+            <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+              Transformamos tus ideas en objetos reales con impresión 3D de alta precisión. 
+              Innovación, calidad y dedicación en cada proyecto.
+            </p>
+            <div className="flex items-center gap-3 mt-2">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                asChild 
+                className="rounded-full hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110"
+              >
+                <Link href="#" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                asChild
+                className="rounded-full hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110"
+              >
+                <Link href="#" target="_blank" rel="noopener noreferrer">
+                  <Linkedin className="h-5 w-5" />
+                </Link>
+              </Button>
             </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="space-y-4">
+            <h4 className="font-headline text-lg font-semibold">Navegación</h4>
+            <nav className="flex flex-col gap-2">
+              <Link href="#inicio" className="text-sm text-muted-foreground hover:text-primary transition-colors relative inline-block w-fit group">
+                Inicio
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="#tienda" className="text-sm text-muted-foreground hover:text-primary transition-colors relative inline-block w-fit group">
+                Tienda
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="#servicios" className="text-sm text-muted-foreground hover:text-primary transition-colors relative inline-block w-fit group">
+                Servicios
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="#materiales" className="text-sm text-muted-foreground hover:text-primary transition-colors relative inline-block w-fit group">
+                Materiales
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="#galeria" className="text-sm text-muted-foreground hover:text-primary transition-colors relative inline-block w-fit group">
+                Galería
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+            </nav>
+          </div>
+
+          {/* Contact */}
+          <div className="space-y-4">
+            <h4 className="font-headline text-lg font-semibold">Contacto</h4>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <span className="text-primary">📧</span>
+                <a 
+                  href="mailto:contacto@arcay3dlabs.com" 
+                  className="hover:text-primary transition-colors underline-offset-4 hover:underline"
+                >
+                  contacto@arcay3dlabs.com
+                </a>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-primary">⏰</span>
+                <span>Lun - Vie: 9:00 AM - 6:00 PM</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-primary">📍</span>
+                <span>Disponible en todo Perú</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-8 border-t border-border/50">
+          <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
+            <p>
+              &copy; {new Date().getFullYear()} <span className="gradient-text font-semibold">Arcay3Dlabs</span>. 
+              Todos los derechos reservados.
+            </p>
+            <div className="flex gap-6">
+              <Link href="#" className="hover:text-primary transition-colors relative group">
+                Política de Privacidad
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="#" className="hover:text-primary transition-colors relative group">
+                Términos de Servicio
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+              <Link href="/admin" className="hover:text-primary transition-colors relative group">
+                Admin
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
