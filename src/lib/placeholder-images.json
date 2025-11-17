@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A close-up shot of a 3D printer head precisely extruding a vibrant blue filament to create a complex geometric object.",
+      "imageUrl": "https://images.unsplash.com/photo-1603974739154-7b055aeec101?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHwzZCUyMHByaW50ZXJ8ZW58MHx8fHwxNzYzMjczNTc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "3d printer"
+    },
+    {
+      "id": "product-1",
+      "description": "A sleek, minimalist 3D printed vase with a geometric pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1647515032361-83323449b85e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxnZW9tZXRyaWMlMjB2YXNlfGVufDB8fHx8MTc2MzMzNzYyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "geometric vase"
+    },
+    {
+      "id": "product-2",
+      "description": "A detailed 3D printed miniature figurine of a fantasy character.",
+      "imageUrl": "https://images.unsplash.com/photo-1711815116546-11daa409faea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmYW50YXN5JTIwZmlndXJpbmV8ZW58MHx8fHwxNzYzMzM3NjI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fantasy figurine"
+    },
+    {
+      "id": "product-3",
+      "description": "A functional 3D printed mechanical part, showing precision engineering.",
+      "imageUrl": "https://images.unsplash.com/photo-1762915164568-1d2ce77bbb02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWVjaGFuaWNhbCUyMHBhcnR8ZW58MHx8fHwxNzYzMjg2MjUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mechanical part"
+    },
+    {
+      "id": "product-4",
+      "description": "A colorful 3D printed organizer for a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1703589535872-93c3b0f96ba3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkZXNrJTIwb3JnYW5pemVyfGVufDB8fHx8MTc2MzI3NzQyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "desk organizer"
+    },
+    {
+      "id": "gallery-1",
+      "description": "A collection of 3D printed architectural models.",
+      "imageUrl": "https://images.unsplash.com/photo-1735448214021-0acd15cb9f58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhcmNoaXRlY3R1cmFsJTIwbW9kZWxzfGVufDB8fHx8MTc2MzMzNzYyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architectural models"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Close-up on the fine layers of a high-resolution resin print.",
+      "imageUrl": "https://images.unsplash.com/photo-1738071341642-385478cc207e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyZXNpbiUyMHByaW50fGVufDB8fHx8MTc2MzMzNzYyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "resin print"
+    },
+    {
+      "id": "gallery-3",
+      "description": "A custom 3D printed drone chassis prototype.",
+      "imageUrl": "https://images.unsplash.com/photo-1624952627456-14559ef04cec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkcm9uZSUyMHByb3RvdHlwZXxlbnwwfHx8fDE3NjMzMzc2MjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "drone prototype"
+    },
+    {
+      "id": "gallery-4",
+      "description": "A variety of 3D prints in different colors and materials.",
+      "imageUrl": "https://images.unsplash.com/photo-1674955951866-821ae461d766?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjb2xvcmVkJTIwZmlsYW1lbnRzfGVufDB8fHx8MTc2MzMzNzYyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "colored filaments"
+    },
+    {
+      "id": "gallery-5",
+      "description": "A person holding a finished 3D printed object.",
+      "imageUrl": "https://images.unsplash.com/photo-1602123207966-1933f2e0ccce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob2xkaW5nJTIwb2JqZWN0fGVufDB8fHx8MTc2MzMzNzYyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "holding object"
+    },
+    {
+      "id": "gallery-6",
+      "description": "A time-lapse shot showing a 3D print being built layer by layer.",
+      "imageUrl": "https://images.unsplash.com/photo-1761570942699-775c59ac7fac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwcmludCUyMHRpbWVsYXBzZXxlbnwwfHx8fDE3NjMzMzc2MjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "print timelapse"
+    }
+  ]
 }
