@@ -104,11 +104,80 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      // Generate WhatsApp message with order summary
+      // 1. ENVIAR SOLICITUD DE VENTA A VENTIFY
+      let requestId = '';
+      let requestNumber = '';
+      
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_VENTIFY_API_URL;
+        const accountId = process.env.NEXT_PUBLIC_ACCOUNT_ID;
+        const apiKey = process.env.NEXT_PUBLIC_VENTIFY_API_KEY;
+
+        if (!apiUrl || !accountId || !apiKey) {
+          throw new Error('Ventify API not configured');
+        }
+
+        const saleRequestData = {
+          customerName: formData.fullName,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+          items: items.map(item => ({
+            productId: item.id,
+            productName: item.name,
+            sku: item.sku || '',
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          shippingAddress: {
+            street: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
+          subtotal,
+          shipping,
+          tax,
+          total,
+          preferredPaymentMethod: formData.paymentMethod,
+          notes: formData.notes,
+        };
+
+        const response = await fetch(`${apiUrl}/api/public/stores/${accountId}/sale-requests`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': apiKey,
+          },
+          body: JSON.stringify(saleRequestData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.success) {
+          requestId = result.data.requestId;
+          requestNumber = result.data.requestNumber;
+          console.log('✅ Solicitud registrada en Ventify:', requestNumber);
+        }
+      } catch (error) {
+        console.error('❌ Error registrando en Ventify:', error);
+        // Continuamos con WhatsApp aunque falle Ventify
+      }
+
+      // 2. GENERAR MENSAJE DE WHATSAPP
       const phoneNumber = siteConfig.contact.whatsapp;
       
       let message = `*🛒 NUEVO PEDIDO - Arcay3Dlabs*\n\n`;
-      message += `*👤 Cliente:*\n`;
+      
+      // Agregar número de solicitud si existe
+      if (requestNumber) {
+        message += `*� Solicitud: ${requestNumber}*\n\n`;
+      }
+      
+      message += `*�👤 Cliente:*\n`;
       message += `Nombre: ${formData.fullName}\n`;
       message += `Email: ${formData.email}\n`;
       message += `Teléfono: ${formData.phone}\n\n`;
@@ -148,10 +217,11 @@ export default function CheckoutPage() {
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-      // Save order to localStorage for reference
-      const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // 3. GUARDAR EN LOCALSTORAGE (backup)
+      const orderId = requestId || `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const orderData = {
         id: orderId,
+        requestNumber: requestNumber || null,
         customerName: formData.fullName,
         customerEmail: formData.email,
         customerPhone: formData.phone,
@@ -178,7 +248,6 @@ export default function CheckoutPage() {
         createdAt: new Date().toISOString(),
       };
 
-      // Store in localStorage
       try {
         const orders = JSON.parse(localStorage.getItem('arcay3dlabs_orders') || '[]');
         orders.push(orderData);
@@ -187,21 +256,21 @@ export default function CheckoutPage() {
         console.error('Error saving order to localStorage:', error);
       }
 
-      // Clear cart
+      // 4. LIMPIAR CARRITO
       clearCart();
 
-      // Show success message
+      // 5. MOSTRAR MENSAJE DE ÉXITO
       toast({
         title: '¡Redirigiendo a WhatsApp!',
         description: 'Te conectaremos con un asesor de ventas',
       });
 
-      // Redirect to WhatsApp
+      // 6. ABRIR WHATSAPP
       window.open(whatsappUrl, '_blank');
 
-      // Redirect to confirmation page
+      // 7. REDIRIGIR A PÁGINA DE CONFIRMACIÓN
       setTimeout(() => {
-        router.push(`/pedido-confirmado?orderId=${orderId}`);
+        router.push(`/pedido-confirmado?orderId=${orderId}&requestNumber=${requestNumber}`);
       }, 1000);
     } catch (error) {
       console.error('Error processing order:', error);
