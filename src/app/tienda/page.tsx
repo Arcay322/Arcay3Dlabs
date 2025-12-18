@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { PRODUCT_CATEGORIES } from '@/lib/firebase/types';
 
 export default function TiendaPage() {
-  const { products, loading, error } = useProducts();
+  const { products, loading, error, usingFallback } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
@@ -91,6 +91,25 @@ export default function TiendaPage() {
           </div>
         </div>
       </section>
+
+      {/* Indicador de Fallback */}
+      {usingFallback && (
+        <div className="container mx-auto px-4 md:px-6 py-4">
+          <div className="p-4 bg-yellow-500/10 border-2 border-yellow-500/30 rounded-lg animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
+                  Modo Demostración Activo
+                </p>
+                <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  Los productos mostrados son de ejemplo. El inventario real no está disponible temporalmente.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters Section */}
       <section className="sticky top-20 z-40 bg-background/95 backdrop-blur-md border-b shadow-sm">

@@ -53,22 +53,22 @@ export function Gallery() {
   };
 
   return (
-    <section id="galeria" className="relative w-full py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background to-secondary overflow-hidden">
+    <section id="galeria" className="relative w-full py-16 md:py-24 lg:py-32 bg-transparent overflow-hidden">
       {/* Background Decorations */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
+      <div className="absolute top-20 right-0 w-96 h-96 bg-neon-purple/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-96 h-96 bg-neon-cyan/5 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center animate-fadeIn">
-          <Badge className="mb-4 gradient-primary">
+          <Badge className="mb-4 bg-neon-cyan/10 text-neon-cyan border-neon-cyan/50 hover:bg-neon-cyan/20 transition-colors">
             Nuestros Proyectos
           </Badge>
-          <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
+          <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4 text-white">
             Galería de{' '}
-            <span className="gradient-text">Trabajos</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Trabajos</span>
           </h2>
-          <p className="text-lg text-muted-foreground md:text-xl">
+          <p className="text-lg text-gray-400 md:text-xl">
             Explora algunos de nuestros proyectos completados. Precisión, detalle y acabados profesionales.
           </p>
         </div>
@@ -82,8 +82,8 @@ export function Gallery() {
               onClick={() => setSelectedCategory(category)}
               className={
                 selectedCategory === category
-                  ? 'gradient-primary shadow-glow'
-                  : 'hover:border-primary/50'
+                  ? 'bg-neon-cyan text-black hover:bg-cyan-400 font-bold shadow-[0_0_10px_rgba(0,243,255,0.4)] border-none'
+                  : 'bg-transparent border-white/20 text-gray-400 hover:text-white hover:border-neon-cyan/50 hover:bg-white/5'
               }
             >
               {category}
@@ -92,7 +92,7 @@ export function Gallery() {
         </div>
 
         {/* Results Count */}
-        <div className="text-center mb-6 text-sm text-muted-foreground">
+        <div className="text-center mb-6 text-sm text-gray-500">
           {loading ? (
             'Cargando galería...'
           ) : (
@@ -105,9 +105,9 @@ export function Gallery() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-3 animate-pulse">
-                <Skeleton className="aspect-square w-full rounded-lg" />
-                <Skeleton className="h-5 w-3/4 rounded" />
-                <Skeleton className="h-4 w-1/2 rounded" />
+                <Skeleton className="aspect-square w-full rounded-lg bg-white/5" />
+                <Skeleton className="h-5 w-3/4 rounded bg-white/5" />
+                <Skeleton className="h-4 w-1/2 rounded bg-white/5" />
               </div>
             ))}
           </div>
@@ -116,7 +116,7 @@ export function Gallery() {
         {/* Gallery Grid */}
         {!loading && filteredImages.length === 0 && (
           <div className="text-center py-20 animate-fadeIn">
-            <p className="text-muted-foreground text-lg">
+            <p className="text-gray-500 text-lg">
               No hay proyectos en esta categoría aún
             </p>
           </div>
@@ -127,7 +127,7 @@ export function Gallery() {
             {filteredImages.map((image, index) => (
               <div
                 key={image.id}
-                className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer animate-fadeIn hover:shadow-2xl transition-all duration-500"
+                className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer animate-fadeIn border border-white/10 hover:border-neon-cyan/50 transition-all duration-500 hover:shadow-[0_0_20px_rgba(0,243,255,0.15)]"
                 style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => openLightbox(image)}
               >
@@ -150,10 +150,10 @@ export function Gallery() {
                       {image.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="bg-white/20 backdrop-blur-sm border-0">
+                      <Badge variant="secondary" className="bg-white/20 backdrop-blur-sm border-0 text-white">
                         {image.category}
                       </Badge>
-                      <div className="flex items-center gap-2 text-white text-sm">
+                      <div className="flex items-center gap-2 text-neon-cyan text-sm font-medium">
                         <Eye className="h-4 w-4" />
                         <span>Ver más</span>
                       </div>
@@ -163,7 +163,7 @@ export function Gallery() {
 
                 {/* Featured Badge */}
                 {image.featured && (
-                  <Badge className="absolute top-3 right-3 bg-gradient-to-r from-primary to-cyan-500 border-0 shadow-lg">
+                  <Badge className="absolute top-3 right-3 bg-neon-purple text-white border-none shadow-[0_0_10px_rgba(189,0,255,0.4)]">
                     ⭐ Destacado
                   </Badge>
                 )}

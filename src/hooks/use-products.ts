@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ventifyAPI, adaptVentifyProduct } from '@/lib/ventify-api';
 import { Product } from '@/lib/firebase/types';
-import { ventifyAPI, VentifyProduct } from '@/lib/ventify-api';
 
-// Mock products data - Usar hasta que Firebase esté configurado
-const MOCK_PRODUCTS: Product[] = [
+// Mock products data - SOLO COMO FALLBACK cuando la API falla
+const FALLBACK_PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Jarrón Geométrico',
@@ -172,146 +172,102 @@ const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
-// Función para convertir productos de Ventify al formato local
-function mapVentifyProductToLocal(ventifyProduct: VentifyProduct): Product {
-  // Usar imagen de placeholder de Unsplash si no hay imagen
-  const defaultImage = 'https://images.unsplash.com/photo-1635774853448-f733a4c60e4c?w=400';
-  
-  return {
-    id: ventifyProduct.id,
-    name: ventifyProduct.name,
-    description: ventifyProduct.description || '',
-    price: ventifyProduct.price,
-    category: ventifyProduct.category,
-    material: 'PLA', // Valor por defecto, puede venir de Ventify si lo agregas
-    images: ventifyProduct.imageUrl ? [ventifyProduct.imageUrl] : [defaultImage],
-    stock: ventifyProduct.stock,
-    featured: false, // Se puede agregar lógica para featured
-    createdAt: new Date(),
-    updatedAt: new Date(),
+// ============================================================================
+// TIPOS Y INTERFACES
+// ============================================================================
+
+interface UseProductsOptions {
+  category?: string;
+  featured?: boolean;
+  limitCount?: number;
+}
+
+interface UseProductsReturn {
+  products: Product[];
+  loading: boolean;
+  error: Error | null;
+  usingFallback: boolean;
+}
+
+// ============================================================================
+// HOOKS
+// ============================================================================
+
+/**
+ * Hook para obtener productos desde Ventify API
+ * Incluye fallback automático a datos mock en caso de error
+ */
+export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
+  const { data, isLoading, error, isError } = useQuery({
+    queryKey: ['products', filters],
+    queryFn: async () => {
+      // 1. Verificar configuración
+      if (!ventifyAPI.isConfigured()) {
+        throw new Error('Ventify API no está configurada. Verifica las variables de entorno.');
+      }
+
+      console.log('[useProducts] 🔄 Obteniendo productos de Ventify API...');
+
+      // 2. Llamar a la API real de Ventify
+      const ventifyProducts = await ventifyAPI.getProducts({
+        category: filters?.category,
+        active: true,
+        limit: filters?.limitCount,
+      });
+
+      console.log(`[useProducts] ✅ Recibidos ${ventifyProducts.length} productos de Ventify`);
+
+      // 3. Adaptar los datos al formato interno
+      const adapted = ventifyProducts.map(adaptVentifyProduct);
+      
+      // 4. Aplicar filtro de featured si es necesario
+      let filtered = adapted;
+      if (filters?.featured !== undefined) {
+        filtered = adapted.filter(p => p.featured === filters.featured);
+      }
+
+      console.log(`[useProducts] 📦 Productos adaptados y filtrados: ${filtered.length}`);
+
+      return filtered;
+    },
+    retry: 1, // Reintentar solo una vez
+    staleTime: 5 * 60 * 1000, // 5 minutos - datos frescos
+  });
+
+  // FALLBACK: Si hay error, usar datos mock
+  const products = isError ? (() => {
+    console.error('[useProducts] ❌ Error detectado:', error);
+    console.warn('[useProducts] ⚠️ Usando datos FALLBACK (mock)');
+    
+    let fallback = [...FALLBACK_PRODUCTS];
+    
+    // Aplicar filtros al fallback
+    if (filters?.category) {
+      fallback = fallback.filter(p => p.category === filters.category);
+    }
+    if (filters?.featured !== undefined) {
+      fallback = fallback.filter(p => p.featured === filters.featured);
+    }
+    if (filters?.limitCount) {
+      fallback = fallback.slice(0, filters.limitCount);
+    }
+    
+    return fallback;
+  })() : (data || []);
+
+  return { 
+    products, 
+    loading: isLoading, 
+    error: error as Error | null, 
+    usingFallback: isError 
   };
 }
 
-export function useProducts(filters?: { category?: string; featured?: boolean; limitCount?: number }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        
-        // Intentar obtener productos desde Ventify API
-        if (ventifyAPI.isConfigured()) {
-          const ventifyProducts = await ventifyAPI.getProducts({
-            category: filters?.category,
-            active: true,
-            limit: filters?.limitCount,
-          });
-          
-          // Convertir productos de Ventify al formato local
-          const mappedProducts = ventifyProducts.map(mapVentifyProductToLocal);
-          
-          // Aplicar filtro de featured si es necesario
-          let filtered = mappedProducts;
-          if (filters?.featured !== undefined) {
-            filtered = filtered.filter(p => p.featured === filters.featured);
-          }
-          
-          setProducts(filtered);
-          setLoading(false);
-        } else {
-          // Fallback a datos mock si Ventify no está configurado
-          console.warn('Ventify API no configurada, usando datos mock');
-          let filtered = [...MOCK_PRODUCTS];
-
-          if (filters?.category) {
-            filtered = filtered.filter(p => p.category === filters.category);
-          }
-
-          if (filters?.featured !== undefined) {
-            filtered = filtered.filter(p => p.featured === filters.featured);
-          }
-
-          if (filters?.limitCount) {
-            filtered = filtered.slice(0, filters.limitCount);
-          }
-
-          setProducts(filtered);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Error al obtener productos:', err);
-        // En caso de error, usar datos mock como fallback
-        let filtered = [...MOCK_PRODUCTS];
-
-        if (filters?.category) {
-          filtered = filtered.filter(p => p.category === filters.category);
-        }
-
-        if (filters?.featured !== undefined) {
-          filtered = filtered.filter(p => p.featured === filters.featured);
-        }
-
-        if (filters?.limitCount) {
-          filtered = filtered.slice(0, filters.limitCount);
-        }
-
-        setProducts(filtered);
-        setError(err as Error);
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [filters?.category, filters?.featured, filters?.limitCount]);
-
-  return { products, loading, error };
+/**
+ * Hook específico para productos destacados
+ * Internamente llama a useProducts con filtro featured:true
+ */
+export function useFeaturedProducts(limitCount: number = 4): UseProductsReturn {
+  return useProducts({ featured: true, limitCount });
 }
 
-export function useFeaturedProducts(limitCount: number = 4) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        
-        // Intentar obtener productos desde Ventify API
-        if (ventifyAPI.isConfigured()) {
-          const ventifyProducts = await ventifyAPI.getProducts({
-            active: true,
-            limit: limitCount,
-          });
-          
-          // Convertir y tomar los primeros productos como featured
-          const mappedProducts = ventifyProducts
-            .map(mapVentifyProductToLocal)
-            .slice(0, limitCount);
-          
-          setProducts(mappedProducts);
-          setLoading(false);
-        } else {
-          // Fallback a datos mock
-          const featured = MOCK_PRODUCTS.filter(p => p.featured).slice(0, limitCount);
-          setProducts(featured);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Error al obtener productos destacados:', err);
-        // Fallback a datos mock en caso de error
-        const featured = MOCK_PRODUCTS.filter(p => p.featured).slice(0, limitCount);
-        setProducts(featured);
-        setError(err as Error);
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [limitCount]);
-
-  return { products, loading, error };
-}

@@ -8,7 +8,7 @@ import { useFeaturedProducts } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function FeaturedProducts() {
-  const { products, loading, error } = useFeaturedProducts(4);
+  const { products, loading, error, usingFallback } = useFeaturedProducts(4);
 
   return (
     <section id="tienda" className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background to-secondary relative overflow-hidden">
@@ -17,6 +17,23 @@ export function FeaturedProducts() {
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10">
+        {/* Indicador de Fallback */}
+        {usingFallback && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border-2 border-yellow-500/30 rounded-lg animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
+                  Mostrando productos de demostración
+                </p>
+                <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  No se pudo conectar con el inventario en tiempo real. Los productos mostrados son de ejemplo.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left animate-fadeIn">
           <div className="space-y-2">
             <div className="inline-block">

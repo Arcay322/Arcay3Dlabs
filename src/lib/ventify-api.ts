@@ -3,6 +3,8 @@
  * Maneja todas las llamadas a la API pública de Ventify
  */
 
+import { Product } from '@/lib/firebase/types';
+
 const API_URL = process.env.NEXT_PUBLIC_VENTIFY_API_URL || 'http://localhost:3000'
 const ACCOUNT_ID = process.env.NEXT_PUBLIC_ACCOUNT_ID
 
@@ -17,6 +19,10 @@ export interface VentifyProduct {
   imageUrl: string
   description: string
   supplier?: string
+  // Campos opcionales nuevos de la API
+  attributes?: Array<{ name: string; value: string }>;
+  galleryImages?: string[];
+  isFeatured?: boolean;
 }
 
 export interface VentifyQuote {
@@ -34,10 +40,27 @@ export interface VentifyQuote {
 class VentifyAPI {
   private baseUrl: string
   private accountId: string | undefined
+  private apiKey: string | undefined
 
   constructor() {
     this.baseUrl = API_URL
     this.accountId = ACCOUNT_ID
+    this.apiKey = process.env.NEXT_PUBLIC_VENTIFY_API_KEY
+  }
+
+  /**
+   * Obtener headers para las requests
+   */
+  private getHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    }
+    
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey
+    }
+    
+    return headers
   }
 
   /**
@@ -64,9 +87,7 @@ class VentifyAPI {
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders(),
     })
 
     if (!response.ok) {
@@ -94,9 +115,7 @@ class VentifyAPI {
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders(),
     })
 
     if (!response.ok) {
@@ -127,9 +146,7 @@ class VentifyAPI {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: this.getHeaders(),
       body: JSON.stringify(quoteData),
     })
 
@@ -167,6 +184,92 @@ class VentifyAPI {
     return this.accountId
   }
 }
+
+// ============================================================================
+// FUNCIONES ADAPTADORAS
+// ============================================================================
+
+/**
+ * Helper: inferir material desde categoría
+ */
+function getMaterialFromCategory(category: string): string {
+  const materialMap: Record<string, string> = {
+    'Figuras': 'Resina',
+    'Decoración': 'PLA',
+    'Arte': 'Resina',
+    'Mecánico': 'ABS',
+    'Organizadores': 'PETG',
+    'Tecnología': 'ABS',
+    'Tecnologia': 'ABS', // Sin acento también
+    'Juguetes': 'PLA',
+  };
+  return materialMap[category] || 'PLA';
+}
+
+/**
+ * Helper: extraer dimensiones de attributes si existen
+ */
+function extractDimensionsFromAttributes(attributes?: Array<{ name: string; value: string }>) {
+  if (!attributes) return { width: 10, height: 10, depth: 10 };
+  
+  const width = attributes.find(a => a.name.toLowerCase().includes('ancho'))?.value;
+  const height = attributes.find(a => a.name.toLowerCase().includes('alto'))?.value;
+  const depth = attributes.find(a => a.name.toLowerCase().includes('profundidad'))?.value;
+  
+  return {
+    width: width ? parseInt(width) : 10,
+    height: height ? parseInt(height) : 10,
+    depth: depth ? parseInt(depth) : 10,
+  };
+}
+
+/**
+ * Helper: extraer peso de attributes
+ */
+function extractWeightFromAttributes(attributes?: Array<{ name: string; value: string }>): number {
+  if (!attributes) return 100;
+  
+  const weight = attributes.find(a => a.name.toLowerCase().includes('peso'))?.value;
+  return weight ? parseInt(weight) : 100;
+}
+
+/**
+ * Adaptador: Convierte datos de Ventify API al formato interno de Arcay3Dlabs
+ * Transforma VentifyProduct → Product (formato interno)
+ */
+export function adaptVentifyProduct(vp: VentifyProduct): Product {
+  return {
+    id: vp.id,
+    name: vp.name,
+    description: vp.description || 'Sin descripción',
+    price: vp.price,
+    category: vp.category,
+    
+    // Inferir material desde categoría
+    material: getMaterialFromCategory(vp.category),
+    
+    // Manejar imágenes (priorizar galleryImages si existe)
+    // Si no hay imagen, usar data URI para evitar errores de carga externa
+    images: vp.galleryImages && vp.galleryImages.length > 0 
+      ? vp.galleryImages 
+      : vp.imageUrl && vp.imageUrl.length > 0
+        ? [vp.imageUrl] 
+        : ['data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e2e8f0"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%23475569"%3ESin Imagen%3C/text%3E%3C/svg%3E'],
+    
+    stock: vp.stock,
+    // Marcar como destacado si: 1) tiene el flag isFeatured, O 2) tiene stock disponible (temporal)
+    featured: vp.isFeatured || vp.inStock,
+    
+    // Timestamps - usar fecha actual como fallback
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    
+    // Extraer de attributes o usar defaults
+    dimensions: extractDimensionsFromAttributes(vp.attributes),
+    weight: extractWeightFromAttributes(vp.attributes),
+  };
+}
+
 
 // Exportar instancia singleton
 export const ventifyAPI = new VentifyAPI()

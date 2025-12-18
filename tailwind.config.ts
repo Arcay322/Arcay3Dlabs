@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from 'tailwindcss';
 
 export default {
   darkMode: ['class'],
@@ -17,11 +17,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Roboto', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
+        body: ['var(--font-roboto)', 'sans-serif'],
+        headline: ['var(--font-space)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
+        'neon-cyan': '#00f3ff',
+        'neon-purple': '#bd00ff',
+        'deep-space': '#050508',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
