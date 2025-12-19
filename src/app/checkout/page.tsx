@@ -16,6 +16,7 @@ import { ArrowLeft, CreditCard, Truck, Package, CheckCircle2, MapPin, MessageCir
 import Link from 'next/link';
 import Image from 'next/image';
 import { siteConfig } from '@/config/site';
+import VentifyAPI from '@/lib/ventify-api'; // ✅ Agregar import (default export)
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -109,13 +110,8 @@ export default function CheckoutPage() {
       let requestNumber = '';
       
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_VENTIFY_API_URL;
-        const accountId = process.env.NEXT_PUBLIC_ACCOUNT_ID;
-        const apiKey = process.env.NEXT_PUBLIC_VENTIFY_API_KEY;
-
-        if (!apiUrl || !accountId || !apiKey) {
-          throw new Error('Ventify API not configured');
-        }
+        // ✅ Usar la clase VentifyAPI que maneja el proxy de forma segura
+        const ventifyApi = new VentifyAPI();
 
         const saleRequestData = {
           customerName: formData.fullName,
@@ -124,7 +120,7 @@ export default function CheckoutPage() {
           items: items.map(item => ({
             productId: item.id,
             productName: item.name,
-            sku: item.sku || '',
+            sku: item.id, // Usar ID como SKU
             quantity: item.quantity,
             price: item.price,
           })),
@@ -143,25 +139,12 @@ export default function CheckoutPage() {
           notes: formData.notes,
         };
 
-        const response = await fetch(`${apiUrl}/api/public/stores/${accountId}/sale-requests`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': apiKey,
-          },
-          body: JSON.stringify(saleRequestData),
-        });
-
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        if (result.success) {
-          requestId = result.data.requestId;
-          requestNumber = result.data.requestNumber;
-          console.log('✅ Solicitud registrada en Ventify:', requestNumber);
-        }
+        // Llamar al proxy que protege las credenciales
+        const result = await ventifyApi.createSaleRequest(saleRequestData);
+        
+        requestId = result.requestId;
+        requestNumber = result.requestNumber;
+        console.log('✅ Solicitud registrada en Ventify:', requestNumber);
       } catch (error) {
         console.error('❌ Error registrando en Ventify:', error);
         // Continuamos con WhatsApp aunque falle Ventify

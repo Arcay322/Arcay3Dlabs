@@ -1,12 +1,13 @@
 /**
- * Cliente API para conectar con Ventify
- * Maneja todas las llamadas a la API pública de Ventify
+ * Cliente API para conectar con Ventify a través de proxy seguro
+ * ✅ Las credenciales se mantienen en el servidor, no se exponen al cliente
  */
 
 import { Product } from '@/lib/firebase/types';
 
-const API_URL = process.env.NEXT_PUBLIC_VENTIFY_API_URL || 'http://localhost:3000'
-const ACCOUNT_ID = process.env.NEXT_PUBLIC_ACCOUNT_ID
+// ✅ Ya no necesitamos estas variables públicas
+// Las credenciales están seguras en el servidor
+const PROXY_BASE_URL = '/api/ventify' // Proxy local
 
 export interface VentifyProduct {
   id: string
@@ -38,50 +39,38 @@ export interface VentifyQuote {
 }
 
 class VentifyAPI {
-  private baseUrl: string
-  private accountId: string | undefined
-  private apiKey: string | undefined
+  private proxyUrl: string
 
   constructor() {
-    this.baseUrl = API_URL
-    this.accountId = ACCOUNT_ID
-    this.apiKey = process.env.NEXT_PUBLIC_VENTIFY_API_KEY
+    // ✅ Usar proxy local en lugar de llamar directamente a Ventify
+    this.proxyUrl = PROXY_BASE_URL
   }
 
   /**
-   * Obtener headers para las requests
+   * Obtener headers para las requests al proxy
+   * Ya no necesitamos API Key aquí, el proxy la maneja
    */
   private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
+    return {
       'Content-Type': 'application/json',
     }
-    
-    if (this.apiKey) {
-      headers['X-API-Key'] = this.apiKey
-    }
-    
-    return headers
   }
 
   /**
-   * Obtener todos los productos
+   * Obtener todos los productos a través del proxy
    */
   async getProducts(options?: {
     category?: string
     active?: boolean
     limit?: number
   }): Promise<VentifyProduct[]> {
-    if (!this.accountId) {
-      console.warn('ACCOUNT_ID no configurado, usando datos mock')
-      throw new Error('ACCOUNT_ID no configurado')
-    }
-
     const params = new URLSearchParams()
     if (options?.category) params.set('category', options.category)
     if (options?.active !== undefined) params.set('active', String(options.active))
     if (options?.limit) params.set('limit', String(options.limit))
 
-    const url = `${this.baseUrl}/api/public/stores/${this.accountId}/products${
+    // ✅ Llamar al proxy local, no directamente a Ventify
+    const url = `${this.proxyUrl}/products${
       params.toString() ? `?${params.toString()}` : ''
     }`
 
@@ -91,7 +80,8 @@ class VentifyAPI {
     })
 
     if (!response.ok) {
-      throw new Error(`Error al obtener productos: ${response.status}`)
+      const error = await response.json().catch(() => ({ error: 'Error desconocido' }))
+      throw new Error(error.error || `Error al obtener productos: ${response.status}`)
     }
 
     const result = await response.json()
@@ -104,14 +94,15 @@ class VentifyAPI {
   }
 
   /**
-   * Obtener un producto por ID
+   * Obtener un producto por ID a través del proxy
    */
   async getProduct(productId: string): Promise<VentifyProduct> {
-    if (!this.accountId) {
-      throw new Error('ACCOUNT_ID no configurado')
+    if (!productId) {
+      throw new Error('Product ID requerido')
     }
 
-    const url = `${this.baseUrl}/api/public/stores/${this.accountId}/products/${productId}`
+    // ✅ Llamar al proxy local
+    const url = `${this.proxyUrl}/products/${productId}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -122,7 +113,8 @@ class VentifyAPI {
       if (response.status === 404) {
         throw new Error('Producto no encontrado')
       }
-      throw new Error(`Error al obtener producto: ${response.status}`)
+      const error = await response.json().catch(() => ({ error: 'Error desconocido' }))
+      throw new Error(error.error || `Error al obtener producto: ${response.status}`)
     }
 
     const result = await response.json()
@@ -135,53 +127,44 @@ class VentifyAPI {
   }
 
   /**
-   * Crear una cotización
+   * Crear una solicitud de venta a través del proxy
    */
-  async createQuote(quoteData: VentifyQuote): Promise<{ id: string; status: string }> {
-    if (!this.accountId) {
-      throw new Error('ACCOUNT_ID no configurado')
-    }
-
-    const url = `${this.baseUrl}/api/public/stores/${this.accountId}/quotes`
+  async createSaleRequest(saleData: any): Promise<{ requestId: string; requestNumber: string }> {
+    // ✅ Llamar al proxy local que maneja las credenciales de forma segura
+    const url = `${this.proxyUrl}/sale-request`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: this.getHeaders(),
-      body: JSON.stringify(quoteData),
+      body: JSON.stringify(saleData),
     })
 
     if (!response.ok) {
-      throw new Error(`Error al crear cotización: ${response.status}`)
+      const error = await response.json().catch(() => ({ error: 'Error desconocido' }))
+      throw new Error(error.error || `Error al crear solicitud: ${response.status}`)
     }
 
     const result = await response.json()
     
     if (!result.success) {
-      throw new Error(result.error || 'Error al crear cotización')
+      throw new Error(result.error || 'Error al crear solicitud')
     }
 
-    return result.data
+    return {
+      requestId: result.data.requestId,
+      requestNumber: result.data.requestNumber,
+    }
   }
 
   /**
-   * Verificar si la API está configurada
+   * Crear una cotización (deprecated - usar createSaleRequest en su lugar)
+   * Este método se mantiene por compatibilidad pero debería migrar a sale-request
    */
-  isConfigured(): boolean {
-    return Boolean(this.accountId)
-  }
-
-  /**
-   * Obtener la URL base de la API
-   */
-  getBaseUrl(): string {
-    return this.baseUrl
-  }
-
-  /**
-   * Obtener el Account ID configurado
-   */
-  getAccountId(): string | undefined {
-    return this.accountId
+  async createQuote(quoteData: VentifyQuote): Promise<{ id: string; status: string }> {
+    console.warn('⚠️ createQuote() está deprecated. Use createSaleRequest() en su lugar.')
+    
+    // Si necesitas mantener cotizaciones, habría que crear un proxy similar
+    throw new Error('Método createQuote() no implementado. Use createSaleRequest() en su lugar.')
   }
 }
 
