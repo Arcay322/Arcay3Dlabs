@@ -30,17 +30,17 @@ export default function CheckoutPage() {
     fullName: '',
     email: '',
     phone: '',
-    
+
     // Shipping Address
     address: '',
     city: '',
     state: '',
     zipCode: '',
     country: 'Perú',
-    
+
     // Payment Method
     paymentMethod: 'transferencia',
-    
+
     // Additional Notes
     notes: '',
   });
@@ -50,8 +50,7 @@ export default function CheckoutPage() {
   // Calculate totals
   const subtotal = totalPrice;
   const shipping = subtotal > siteConfig.shipping.freeShippingThreshold ? 0 : 5.99;
-  const tax = subtotal * siteConfig.tax.rate;
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -108,7 +107,7 @@ export default function CheckoutPage() {
       // 1. ENVIAR SOLICITUD DE VENTA A VENTIFY
       let requestId = '';
       let requestNumber = '';
-      
+
       try {
         // ✅ Usar la clase VentifyAPI que maneja el proxy de forma segura
         const ventifyApi = new VentifyAPI();
@@ -133,7 +132,7 @@ export default function CheckoutPage() {
           },
           subtotal,
           shipping,
-          tax,
+          tax: 0,
           total,
           preferredPaymentMethod: formData.paymentMethod,
           notes: formData.notes,
@@ -141,7 +140,7 @@ export default function CheckoutPage() {
 
         // Llamar al proxy que protege las credenciales
         const result = await ventifyApi.createSaleRequest(saleRequestData);
-        
+
         requestId = result.requestId;
         requestNumber = result.requestNumber;
         console.log('✅ Solicitud registrada en Ventify:', requestNumber);
@@ -152,48 +151,47 @@ export default function CheckoutPage() {
 
       // 2. GENERAR MENSAJE DE WHATSAPP
       const phoneNumber = siteConfig.contact.whatsapp;
-      
+
       let message = `*🛒 NUEVO PEDIDO - Arcay3Dlabs*\n\n`;
-      
+
       // Agregar número de solicitud si existe
       if (requestNumber) {
         message += `*� Solicitud: ${requestNumber}*\n\n`;
       }
-      
+
       message += `*�👤 Cliente:*\n`;
       message += `Nombre: ${formData.fullName}\n`;
       message += `Email: ${formData.email}\n`;
       message += `Teléfono: ${formData.phone}\n\n`;
-      
+
       message += `*📦 Productos:*\n`;
       items.forEach((item, index) => {
         message += `${index + 1}. ${item.name}\n`;
         message += `   Cantidad: ${item.quantity}\n`;
-        message += `   Precio: $${item.price.toFixed(2)} c/u\n`;
-        message += `   Subtotal: $${(item.price * item.quantity).toFixed(2)}\n\n`;
+        message += `   Precio: S/ ${item.price.toFixed(2)} c/u\n`;
+        message += `   Subtotal: S/ ${(item.price * item.quantity).toFixed(2)}\n\n`;
       });
-      
+
       message += `*💰 Resumen de Costos:*\n`;
-      message += `Subtotal: $${subtotal.toFixed(2)}\n`;
-      message += `Envío: ${shipping === 0 ? 'GRATIS 🎉' : `$${shipping.toFixed(2)}`}\n`;
-      message += `IVA (16%): $${tax.toFixed(2)}\n`;
-      message += `*Total: $${total.toFixed(2)}*\n\n`;
-      
+      message += `Subtotal: S/ ${subtotal.toFixed(2)}\n`;
+      message += `Envío: ${shipping === 0 ? 'GRATIS 🎉' : `S/ ${shipping.toFixed(2)}`}\n`;
+      message += `*Total: S/ ${total.toFixed(2)}*\n\n`;
+
       message += `*📍 Dirección de Envío:*\n`;
       message += `${formData.address}\n`;
       message += `${formData.city}, ${formData.state}\n`;
       message += `CP: ${formData.zipCode}\n`;
       message += `${formData.country}\n\n`;
-      
+
       message += `*💳 Método de Pago:*\n`;
-      message += formData.paymentMethod === 'transferencia' 
-        ? '🏦 Transferencia Bancaria\n\n' 
+      message += formData.paymentMethod === 'transferencia'
+        ? '🏦 Transferencia Bancaria\n\n'
         : '💵 Pago Contra Entrega\n\n';
-      
+
       if (formData.notes) {
         message += `*📝 Notas Adicionales:*\n${formData.notes}\n\n`;
       }
-      
+
       message += `_Generado desde Arcay3Dlabs - ${new Date().toLocaleString('es-PE')}_`;
 
       // Encode message for URL
@@ -224,7 +222,7 @@ export default function CheckoutPage() {
         },
         subtotal,
         shipping,
-        tax,
+        tax: 0,
         total,
         paymentMethod: formData.paymentMethod,
         notes: formData.notes,
@@ -558,7 +556,7 @@ export default function CheckoutPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-sm">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            S/ {(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -571,26 +569,23 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>S/ {subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Envío</span>
-                      <span>{shipping === 0 ? 'Gratis' : `$${shipping.toFixed(2)}`}</span>
+                      <span>{shipping === 0 ? 'Gratis' : `S/ ${shipping.toFixed(2)}`}</span>
                     </div>
                     {shipping === 0 && (
                       <div className="flex items-center gap-1 text-xs text-green-600">
                         <CheckCircle2 className="h-3 w-3" />
-                        <span>¡Envío gratis en compras mayores a ${siteConfig.shipping.freeShippingThreshold}!</span>
+                        <span>¡Envío gratis en compras mayores a S/ {siteConfig.shipping.freeShippingThreshold}!</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{siteConfig.tax.name} ({siteConfig.tax.rate * 100}%)</span>
-                      <span>${tax.toFixed(2)}</span>
-                    </div>
+
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="gradient-text">${total.toFixed(2)}</span>
+                      <span className="gradient-text">S/ {total.toFixed(2)}</span>
                     </div>
                   </div>
 
