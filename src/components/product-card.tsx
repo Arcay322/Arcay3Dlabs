@@ -87,12 +87,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
       <CardFooter className="flex gap-2 items-center p-4 pt-0">
         <div className="flex-1">
-          <p className="text-2xl font-bold gradient-text dark:text-white dark:bg-none dark:drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">{formattedPrice}</p>
+          <p className="text-2xl font-bold gradient-text dark:drop-shadow-[0_0_5px_rgba(0,243,255,0.3)]">{formattedPrice}</p>
         </div>
         <Button
           onClick={handleAddToCart}
           disabled={product.stock === 0}
-          className="gradient-primary dark:bg-none dark:gradient-cyan dark:text-black hover:shadow-glow dark:shadow-[0_0_15px_rgba(0,243,255,0.3)] transition-all duration-300 gap-2"
+          className="gradient-primary hover:shadow-glow dark:shadow-[0_0_15px_rgba(0,243,255,0.3)] transition-all duration-300 gap-2 dark:text-black"
           size="sm"
         >
           <ShoppingCart className="h-4 w-4" />

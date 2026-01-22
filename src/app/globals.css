@@ -82,6 +82,10 @@
     background: linear-gradient(135deg, hsl(211, 100%, 50%) 0%, hsl(191, 100%, 45%) 100%);
   }
 
+  .dark .gradient-primary {
+    background: linear-gradient(135deg, #00f3ff 0%, #00a8ff 100%);
+  }
+
   .gradient-secondary {
     background: linear-gradient(135deg, hsl(210, 17%, 98%) 0%, hsl(210, 20%, 95%) 100%);
   }
@@ -96,6 +100,13 @@
 
   .gradient-text {
     background: linear-gradient(135deg, hsl(211, 100%, 50%) 0%, hsl(191, 100%, 45%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .gradient-text {
+    background: linear-gradient(135deg, #00f3ff 0%, #00a8ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

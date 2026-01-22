@@ -47,6 +47,14 @@ class VentifyAPI {
   }
 
   /**
+   * Verificar si la API está configurada
+   * En el cliente siempre devolvemos true, la validación real ocurre en el proxy
+   */
+  isConfigured(): boolean {
+    return true;
+  }
+
+  /**
    * Obtener headers para las requests al proxy
    * Ya no necesitamos API Key aquí, el proxy la maneja
    */
@@ -70,9 +78,8 @@ class VentifyAPI {
     if (options?.limit) params.set('limit', String(options.limit))
 
     // ✅ Llamar al proxy local, no directamente a Ventify
-    const url = `${this.proxyUrl}/products${
-      params.toString() ? `?${params.toString()}` : ''
-    }`
+    const url = `${this.proxyUrl}/products${params.toString() ? `?${params.toString()}` : ''
+      }`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -85,7 +92,7 @@ class VentifyAPI {
     }
 
     const result = await response.json()
-    
+
     if (!result.success) {
       throw new Error(result.error || 'Error al obtener productos')
     }
@@ -118,7 +125,7 @@ class VentifyAPI {
     }
 
     const result = await response.json()
-    
+
     if (!result.success) {
       throw new Error(result.error || 'Error al obtener producto')
     }
@@ -145,7 +152,7 @@ class VentifyAPI {
     }
 
     const result = await response.json()
-    
+
     if (!result.success) {
       throw new Error(result.error || 'Error al crear solicitud')
     }
@@ -162,7 +169,7 @@ class VentifyAPI {
    */
   async createQuote(quoteData: VentifyQuote): Promise<{ id: string; status: string }> {
     console.warn('⚠️ createQuote() está deprecated. Use createSaleRequest() en su lugar.')
-    
+
     // Si necesitas mantener cotizaciones, habría que crear un proxy similar
     throw new Error('Método createQuote() no implementado. Use createSaleRequest() en su lugar.')
   }
@@ -194,11 +201,11 @@ function getMaterialFromCategory(category: string): string {
  */
 function extractDimensionsFromAttributes(attributes?: Array<{ name: string; value: string }>) {
   if (!attributes) return { width: 10, height: 10, depth: 10 };
-  
+
   const width = attributes.find(a => a.name.toLowerCase().includes('ancho'))?.value;
   const height = attributes.find(a => a.name.toLowerCase().includes('alto'))?.value;
   const depth = attributes.find(a => a.name.toLowerCase().includes('profundidad'))?.value;
-  
+
   return {
     width: width ? parseInt(width) : 10,
     height: height ? parseInt(height) : 10,
@@ -211,7 +218,7 @@ function extractDimensionsFromAttributes(attributes?: Array<{ name: string; valu
  */
 function extractWeightFromAttributes(attributes?: Array<{ name: string; value: string }>): number {
   if (!attributes) return 100;
-  
+
   const weight = attributes.find(a => a.name.toLowerCase().includes('peso'))?.value;
   return weight ? parseInt(weight) : 100;
 }
@@ -227,26 +234,26 @@ export function adaptVentifyProduct(vp: VentifyProduct): Product {
     description: vp.description || 'Sin descripción',
     price: vp.price,
     category: vp.category,
-    
+
     // Inferir material desde categoría
     material: getMaterialFromCategory(vp.category),
-    
+
     // Manejar imágenes (priorizar galleryImages si existe)
     // Si no hay imagen, usar data URI para evitar errores de carga externa
-    images: vp.galleryImages && vp.galleryImages.length > 0 
-      ? vp.galleryImages 
+    images: vp.galleryImages && vp.galleryImages.length > 0
+      ? vp.galleryImages
       : vp.imageUrl && vp.imageUrl.length > 0
-        ? [vp.imageUrl] 
+        ? [vp.imageUrl]
         : ['data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e2e8f0"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%23475569"%3ESin Imagen%3C/text%3E%3C/svg%3E'],
-    
+
     stock: vp.stock,
     // Marcar como destacado si: 1) tiene el flag isFeatured, O 2) tiene stock disponible (temporal)
     featured: vp.isFeatured || vp.inStock,
-    
+
     // Timestamps - usar fecha actual como fallback
     createdAt: new Date(),
     updatedAt: new Date(),
-    
+
     // Extraer de attributes o usar defaults
     dimensions: extractDimensionsFromAttributes(vp.attributes),
     weight: extractWeightFromAttributes(vp.attributes),

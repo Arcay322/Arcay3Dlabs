@@ -99,14 +99,14 @@ export function QuoteForm() {
         <div className="grid gap-12 md:grid-cols-2 md:gap-16">
           <div className="space-y-4">
             <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              ¿Tienes un Proyecto en Mente?
+              ¿Tienes un <span className="gradient-text dark:gradient-text-cyan-purple">Proyecto</span> en Mente?
             </h2>
             <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
               Describe tu idea o sube tu modelo 3D. Ofrecemos impresión en PLA, ABS, PETG, Resina y TPU con acabados profesionales.
             </p>
             <div className="space-y-2 text-muted-foreground">
-              <h3 className="font-semibold text-foreground">Materiales Disponibles:</h3>
-              <ul className="list-disc list-inside space-y-1">
+              <h3 className="font-semibold text-primary dark:gradient-text-cyan w-fit">Materiales Disponibles:</h3>
+              <ul className="list-disc list-inside space-y-1 dark:marker:text-cyan-400">
                 <li><strong>PLA:</strong> Ideal para prototipos y decoración</li>
                 <li><strong>ABS:</strong> Mayor resistencia mecánica</li>
                 <li><strong>PETG:</strong> Flexible y resistente</li>
@@ -246,7 +246,7 @@ export function QuoteForm() {
                             accept=".stl,.obj,.3mf,.gcode"
                             onChange={(e) => onChange(e.target.files)}
                             {...fieldProps}
-                            className="h-11 cursor-pointer"
+                            className="h-11 cursor-pointer file:text-primary dark:file:text-transparent dark:file:bg-clip-text dark:file:bg-gradient-to-r dark:file:from-[#00f3ff] dark:file:to-[#00a8ff]"
                           />
                         </FormControl>
                         <FormDescription>
@@ -259,7 +259,7 @@ export function QuoteForm() {
 
                   <Button
                     type="submit"
-                    className="w-full dark:bg-none dark:gradient-cyan dark:text-black"
+                    className="w-full gradient-primary dark:text-black"
                     size="lg"
                     disabled={isSubmitting}
                   >
