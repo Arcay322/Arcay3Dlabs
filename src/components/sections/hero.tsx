@@ -22,14 +22,14 @@ export function Hero() {
           />
         </div>
       )}
-      
+
       {/* Enhanced Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-primary/30" />
-      
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-primary/30 dark:to-neon-cyan/20" />
+
       {/* Animated Background Shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 dark:bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/10 dark:bg-neon-purple/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
       </div>
 
       {/* Content */}
@@ -38,8 +38,8 @@ export function Hero() {
           <div className="max-w-4xl mx-auto space-y-8">
             {/* Badge */}
             <div className="animate-fadeIn">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark text-sm font-medium">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-dark text-sm font-medium border-white/10 dark:border-neon-cyan/30 dark:shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+                <Sparkles className="w-4 h-4 text-cyan-400 dark:text-neon-cyan" />
                 Impresión 3D de Alta Precisión
               </span>
             </div>
@@ -47,36 +47,36 @@ export function Hero() {
             {/* Main Heading with Gradient */}
             <h1 className="font-headline text-4xl font-bold tracking-tight md:text-5xl lg:text-7xl animate-slideInLeft">
               De la Idea al Objeto:{" "}
-              <span className="gradient-text block mt-2">
+              <span className="gradient-text dark:gradient-text-cyan-purple block mt-2">
                 Impresión 3D de Precisión
               </span>
             </h1>
 
             {/* Description */}
             <p className="max-w-2xl mx-auto text-lg text-gray-200 md:text-xl animate-slideInRight leading-relaxed">
-              Venta de modelos exclusivos y servicios de impresión 3D bajo demanda. 
-              <span className="block mt-2 text-cyan-300 font-semibold">
+              Venta de modelos exclusivos y servicios de impresión 3D bajo demanda.
+              <span className="block mt-2 text-cyan-300 dark:text-neon-cyan font-semibold">
                 Transforma tus ideas en realidad
               </span>
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-              <Button 
-                asChild 
-                size="lg" 
-                className="gradient-primary shadow-glow hover:shadow-glow-lg transition-all duration-300 text-base font-semibold group"
+              <Button
+                asChild
+                size="lg"
+                className="gradient-primary dark:bg-none dark:gradient-cyan dark:text-black dark:hover:bg-cyan-400 shadow-glow hover:shadow-glow-lg dark:shadow-[0_0_20px_rgba(0,243,255,0.4)] transition-all duration-300 text-base font-semibold group"
               >
                 <Link href="#tienda" className="flex items-center gap-2">
                   Ver Productos
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button 
-                asChild 
-                variant="outline" 
+              <Button
+                asChild
+                variant="outline"
                 size="lg"
-                className="glass-dark border-white/30 hover:bg-white/20 backdrop-blur-md text-base font-semibold"
+                className="glass-dark border-white/30 dark:border-neon-purple/50 hover:bg-white/20 dark:hover:bg-neon-purple/20 backdrop-blur-md text-base font-semibold dark:text-white"
               >
                 <Link href="#servicios">Solicitar Servicio</Link>
               </Button>
@@ -84,16 +84,16 @@ export function Hero() {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 pt-8 max-w-2xl mx-auto animate-scaleIn" style={{ animationDelay: '0.5s' }}>
-              <div className="glass-dark rounded-lg p-4 backdrop-blur-md">
-                <div className="text-3xl font-bold gradient-text">500+</div>
+              <div className="glass-dark rounded-lg p-4 backdrop-blur-md dark:border-neon-cyan/20">
+                <div className="text-3xl font-bold gradient-text dark:gradient-text-cyan-purple">500+</div>
                 <div className="text-sm text-gray-300 mt-1">Proyectos</div>
               </div>
-              <div className="glass-dark rounded-lg p-4 backdrop-blur-md">
-                <div className="text-3xl font-bold gradient-text">24h</div>
+              <div className="glass-dark rounded-lg p-4 backdrop-blur-md dark:border-neon-cyan/20">
+                <div className="text-3xl font-bold gradient-text dark:gradient-text-cyan-purple">24h</div>
                 <div className="text-sm text-gray-300 mt-1">Entrega Rápida</div>
               </div>
-              <div className="glass-dark rounded-lg p-4 backdrop-blur-md">
-                <div className="text-3xl font-bold gradient-text">99%</div>
+              <div className="glass-dark rounded-lg p-4 backdrop-blur-md dark:border-neon-cyan/20">
+                <div className="text-3xl font-bold gradient-text dark:gradient-text-cyan-purple">99%</div>
                 <div className="text-sm text-gray-300 mt-1">Satisfacción</div>
               </div>
             </div>
@@ -103,8 +103,8 @@ export function Hero() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
-          <div className="w-1 h-3 bg-white rounded-full animate-pulse" />
+        <div className="w-6 h-10 rounded-full border-2 border-white/30 dark:border-neon-cyan/30 flex items-start justify-center p-2 dark:shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+          <div className="w-1 h-3 bg-white dark:bg-neon-cyan rounded-full animate-pulse" />
         </div>
       </div>
     </section>

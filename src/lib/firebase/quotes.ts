@@ -18,6 +18,11 @@ const QUOTES_COLLECTION = 'quotes';
 
 // Upload file to Firebase Storage
 export async function uploadQuoteFile(file: File): Promise<string> {
+  if (!storage) {
+    console.warn('Firebase Storage no está inicializado. No se puede subir el archivo.');
+    throw new Error('El servicio de almacenamiento no está disponible.');
+  }
+
   const timestamp = Date.now();
   const fileName = `quotes/${timestamp}_${file.name}`;
   const storageRef = ref(storage, fileName);

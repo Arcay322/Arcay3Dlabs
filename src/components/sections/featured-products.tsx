@@ -15,7 +15,7 @@ export function FeaturedProducts() {
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
-      
+
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Indicador de Fallback */}
         {usingFallback && (
@@ -37,21 +37,21 @@ export function FeaturedProducts() {
         <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left animate-fadeIn">
           <div className="space-y-2">
             <div className="inline-block">
-              <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+              <span className="text-sm font-semibold text-primary dark:gradient-text-cyan uppercase tracking-wider">
                 Productos Destacados
               </span>
             </div>
             <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Nuestras{" "}
-              <span className="gradient-text">Creaciones</span>
+              <span className="gradient-text dark:gradient-text-cyan-purple">Creaciones</span>
             </h2>
             <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
               Explora nuestra colección de productos únicos, listos para enviar.
             </p>
           </div>
-          <Button 
-            asChild 
-            variant="outline" 
+          <Button
+            asChild
+            variant="outline"
             size="lg"
             className="group border-2 hover:border-primary transition-all duration-300"
           >
@@ -87,7 +87,7 @@ export function FeaturedProducts() {
             </div>
           ) : (
             products.map((product, index) => (
-              <div 
+              <div
                 key={product.id}
                 className="animate-fadeIn"
                 style={{ animationDelay: `${index * 0.1}s` }}

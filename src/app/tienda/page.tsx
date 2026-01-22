@@ -75,15 +75,15 @@ export default function TiendaPage() {
       <section className="relative py-16 md:py-24 bg-gradient-to-br from-primary/10 via-cyan-500/5 to-background overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        
+
         <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center animate-fadeIn">
-            <Badge className="mb-4 gradient-primary">
+            <Badge className="mb-4 gradient-primary dark:gradient-cyan">
               Catálogo Completo
             </Badge>
             <h1 className="font-headline text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl mb-4">
               Nuestra{' '}
-              <span className="gradient-text">Tienda</span>
+              <span className="gradient-text dark:gradient-text-cyan">Tienda</span>
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl max-w-2xl mx-auto">
               Explora nuestra colección completa de productos impresos en 3D. Encuentra lo que necesitas.

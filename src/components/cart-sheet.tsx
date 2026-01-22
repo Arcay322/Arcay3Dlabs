@@ -128,7 +128,7 @@ export function CartSheet() {
 
                           {/* Price */}
                           <div className="text-right">
-                            <p className="font-bold text-sm gradient-text">{formattedPrice}</p>
+                            <p className="font-bold text-sm gradient-text dark:gradient-text-cyan">{formattedPrice}</p>
                             {item.quantity > 1 && (
                               <p className="text-xs text-muted-foreground">
                                 ${item.price.toFixed(2)} c/u
@@ -167,7 +167,7 @@ export function CartSheet() {
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="gradient-text">{formattedTotal}</span>
+                  <span className="gradient-text dark:gradient-text-cyan">{formattedTotal}</span>
                 </div>
               </div>
 
@@ -175,7 +175,7 @@ export function CartSheet() {
               <SheetFooter className="flex-col gap-2 sm:flex-col">
                 <Button
                   asChild
-                  className="w-full gradient-primary shadow-glow"
+                  className="w-full gradient-primary shadow-glow dark:bg-none dark:gradient-cyan dark:text-black"
                   size="lg"
                   onClick={() => setOpen(false)}
                 >

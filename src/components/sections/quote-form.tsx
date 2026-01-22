@@ -32,7 +32,7 @@ import { MATERIALS } from "@/lib/firebase";
 export function QuoteForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
     defaultValues: {
@@ -72,7 +72,7 @@ export function QuoteForm() {
 
       // Por ahora solo simulamos el envío
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       console.log('Cotización (modo demo):', data);
 
       toast({
@@ -94,7 +94,7 @@ export function QuoteForm() {
   }
 
   return (
-    <section id="servicios" className="w-full py-16 md:py-24 lg:py-32 bg-secondary">
+    <section id="servicios" className="w-full py-16 md:py-24 lg:py-32 bg-secondary dark:bg-deep-space">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid gap-12 md:grid-cols-2 md:gap-16">
           <div className="space-y-4">
@@ -118,7 +118,7 @@ export function QuoteForm() {
               Nuestro equipo de expertos revisará tu solicitud y te enviará una cotización detallada lo antes posible.
             </p>
           </div>
-          <Card className="shadow-2xl">
+          <Card className="shadow-2xl dark:glass-dark dark:border-neon-cyan/20">
             <CardHeader>
               <CardTitle className="font-headline text-2xl">Solicitar Cotización</CardTitle>
             </CardHeader>
@@ -138,7 +138,7 @@ export function QuoteForm() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -153,7 +153,7 @@ export function QuoteForm() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="phone"
@@ -194,7 +194,7 @@ export function QuoteForm() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="quantity"
@@ -233,7 +233,7 @@ export function QuoteForm() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="file"
@@ -259,7 +259,7 @@ export function QuoteForm() {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full dark:bg-none dark:gradient-cyan dark:text-black"
                     size="lg"
                     disabled={isSubmitting}
                   >

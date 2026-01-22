@@ -55,18 +55,18 @@ export function Gallery() {
   return (
     <section id="galeria" className="relative w-full py-16 md:py-24 lg:py-32 bg-gradient-to-b from-background to-secondary overflow-hidden">
       {/* Background Decorations */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
+      <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 dark:bg-neon-cyan/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-96 h-96 bg-cyan-500/5 dark:bg-neon-purple/5 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center animate-fadeIn">
-          <Badge className="mb-4 gradient-primary">
+          <Badge className="mb-4 gradient-primary dark:bg-none dark:bg-neon-cyan/10 dark:text-neon-cyan dark:border dark:border-neon-cyan/50">
             Nuestros Proyectos
           </Badge>
           <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
             Galería de{' '}
-            <span className="gradient-text">Trabajos</span>
+            <span className="gradient-text dark:gradient-text-cyan-purple">Trabajos</span>
           </h2>
           <p className="text-lg text-muted-foreground md:text-xl">
             Explora algunos de nuestros proyectos completados. Precisión, detalle y acabados profesionales.
@@ -82,8 +82,8 @@ export function Gallery() {
               onClick={() => setSelectedCategory(category)}
               className={
                 selectedCategory === category
-                  ? 'gradient-primary shadow-glow'
-                  : 'hover:border-primary/50'
+                  ? 'gradient-primary shadow-glow dark:bg-none dark:gradient-cyan dark:text-black dark:shadow-[0_0_15px_rgba(0,243,255,0.3)]'
+                  : 'hover:border-primary/50 dark:hover:border-neon-cyan/50 dark:hover:text-neon-cyan'
               }
             >
               {category}
@@ -163,7 +163,7 @@ export function Gallery() {
 
                 {/* Featured Badge */}
                 {image.featured && (
-                  <Badge className="absolute top-3 right-3 bg-gradient-to-r from-primary to-cyan-500 border-0 shadow-lg">
+                  <Badge className="absolute top-3 right-3 gradient-primary dark:bg-none dark:gradient-cyan dark:text-black border-0 shadow-lg">
                     ⭐ Destacado
                   </Badge>
                 )}
