@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/lib/firebase/types";
 
 type ProductCardProps = {
@@ -28,10 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
     });
   };
   const mainImage = product.images?.[0] || '/placeholder-product.jpg';
-  const formattedPrice = new Intl.NumberFormat('es-PE', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(product.price);
+  const formattedPrice = formatPrice(product.price);
 
   return (
     <Card className="overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group border-2 hover:border-primary/50 dark:border-neon-cyan/30 dark:hover:border-neon-cyan/50 dark:bg-card">

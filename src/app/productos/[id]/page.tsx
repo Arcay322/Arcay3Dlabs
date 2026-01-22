@@ -27,6 +27,7 @@ import {
   Box,
   Check,
 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 import type { Product } from '@/lib/firebase/types';
 
 export default function ProductoPage() {
@@ -75,8 +76,8 @@ export default function ProductoPage() {
   // Get related products (same category)
   const relatedProducts = product
     ? products
-        .filter(p => p.id !== product.id && p.category === product.category)
-        .slice(0, 4)
+      .filter(p => p.id !== product.id && p.category === product.category)
+      .slice(0, 4)
     : [];
 
   if (loading) {
@@ -107,10 +108,7 @@ export default function ProductoPage() {
     );
   }
 
-  const formattedPrice = new Intl.NumberFormat('es-PE', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(product.price);
+  const formattedPrice = formatPrice(product.price);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
@@ -159,11 +157,10 @@ export default function ProductoPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${
-                      selectedImage === index
-                        ? 'border-primary ring-2 ring-primary/20'
-                        : 'border-border'
-                    }`}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${selectedImage === index
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'border-border'
+                      }`}
                   >
                     <div className="relative w-full h-full">
                       <Image
@@ -196,16 +193,15 @@ export default function ProductoPage() {
               <h1 className="font-headline text-3xl md:text-4xl font-bold mb-2">
                 {product.name}
               </h1>
-              
+
               {/* Rating - Mock for now */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${
-                        i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                      }`}
+                      className={`h-4 w-4 ${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                        }`}
                     />
                   ))}
                 </div>
@@ -322,7 +318,7 @@ export default function ProductoPage() {
               <TabsTrigger value="description">Descripción</TabsTrigger>
               <TabsTrigger value="specs">Especificaciones</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="description">
               <Card className="border-2">
                 <CardContent className="p-6 md:p-8">
@@ -354,7 +350,7 @@ export default function ProductoPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="specs">
               <Card className="border-2">
                 <CardContent className="p-6 md:p-8">

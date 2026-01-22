@@ -3,7 +3,7 @@ export const siteConfig = {
   name: 'Arcay3Dlabs',
   description: 'De la Idea al Objeto: Impresión 3D de Precisión',
   url: 'https://arcay3dlabs.com', // TODO: Update with your actual domain
-  
+
   // Contact Information
   contact: {
     // WhatsApp number (include country code, no spaces or special characters)
@@ -29,7 +29,7 @@ export const siteConfig = {
 
   // Shipping
   shipping: {
-    freeShippingThreshold: 50, // Free shipping for orders over this amount (USD)
+    freeShippingThreshold: 50, // Free shipping for orders over this amount (PEN)
     estimatedDays: '5-7 días hábiles',
     preparationDays: '2-3 días hábiles',
   },

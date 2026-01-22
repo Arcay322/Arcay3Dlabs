@@ -15,16 +15,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/cart-context';
+import { formatPrice } from '@/lib/utils';
 import { useState } from 'react';
 
 export function CartSheet() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
   const [open, setOpen] = useState(false);
 
-  const formattedTotal = new Intl.NumberFormat('es-PE', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(totalPrice);
+  const formattedTotal = formatPrice(totalPrice);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -72,10 +70,7 @@ export function CartSheet() {
               <div className="space-y-4 py-4">
                 {items.map((item) => {
                   const itemTotal = item.price * item.quantity;
-                  const formattedPrice = new Intl.NumberFormat('es-PE', {
-                    style: 'currency',
-                    currency: 'USD',
-                  }).format(itemTotal);
+                  const formattedPrice = formatPrice(itemTotal);
 
                   return (
                     <div
@@ -131,7 +126,7 @@ export function CartSheet() {
                             <p className="font-bold text-sm gradient-text dark:gradient-text-cyan">{formattedPrice}</p>
                             {item.quantity > 1 && (
                               <p className="text-xs text-muted-foreground">
-                                ${item.price.toFixed(2)} c/u
+                                {formatPrice(item.price)} c/u
                               </p>
                             )}
                           </div>
