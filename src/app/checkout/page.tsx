@@ -152,19 +152,34 @@ export default function CheckoutPage() {
       // 2. GENERAR MENSAJE DE WHATSAPP
       const phoneNumber = siteConfig.contact.whatsapp;
 
-      let message = `*🛒 NUEVO PEDIDO - Arcay3Dlabs*\n\n`;
+      // Emojis en Unicode para evitar problemas de codificación
+      const EMOJI = {
+        CART: '\uD83D\uDED2',
+        DOC: '\uD83D\uDCC4',
+        USER: '\uD83D\uDC64',
+        BOX: '\uD83D\uDCE6',
+        MONEY: '\uD83D\uDCB0',
+        PIN: '\uD83D\uDCCD',
+        CARD: '\uD83D\uDCB3',
+        MEMO: '\uD83D\uDCDD',
+        PARTY: '\uD83C\uDF89',
+        BANK: '\uD83C\uDFE6',
+        CASH: '\uD83D\uDCB5'
+      };
+
+      let message = `*${EMOJI.CART} NUEVO PEDIDO - Arcay3Dlabs*\n\n`;
 
       // Agregar número de solicitud si existe
       if (requestNumber) {
-        message += `*� Solicitud: ${requestNumber}*\n\n`;
+        message += `*${EMOJI.DOC} Solicitud: ${requestNumber}*\n\n`;
       }
 
-      message += `*�👤 Cliente:*\n`;
+      message += `*${EMOJI.USER} Cliente:*\n`;
       message += `Nombre: ${formData.fullName}\n`;
       message += `Email: ${formData.email}\n`;
       message += `Teléfono: ${formData.phone}\n\n`;
 
-      message += `*📦 Productos:*\n`;
+      message += `*${EMOJI.BOX} Productos:*\n`;
       items.forEach((item, index) => {
         message += `${index + 1}. ${item.name}\n`;
         message += `   Cantidad: ${item.quantity}\n`;
@@ -172,31 +187,31 @@ export default function CheckoutPage() {
         message += `   Subtotal: S/ ${(item.price * item.quantity).toFixed(2)}\n\n`;
       });
 
-      message += `*💰 Resumen de Costos:*\n`;
+      message += `*${EMOJI.MONEY} Resumen de Costos:*\n`;
       message += `Subtotal: S/ ${subtotal.toFixed(2)}\n`;
-      message += `Envío: ${shipping === 0 ? 'GRATIS 🎉' : `S/ ${shipping.toFixed(2)}`}\n`;
+      message += `Envío: ${shipping === 0 ? `GRATIS ${EMOJI.PARTY}` : `S/ ${shipping.toFixed(2)}`}\n`;
       message += `*Total: S/ ${total.toFixed(2)}*\n\n`;
 
-      message += `*📍 Dirección de Envío:*\n`;
+      message += `*${EMOJI.PIN} Dirección de Envío:*\n`;
       message += `${formData.address}\n`;
       message += `${formData.city}, ${formData.state}\n`;
       message += `CP: ${formData.zipCode}\n`;
       message += `${formData.country}\n\n`;
 
-      message += `*💳 Método de Pago:*\n`;
+      message += `*${EMOJI.CARD} Método de Pago:*\n`;
       message += formData.paymentMethod === 'transferencia'
-        ? '🏦 Transferencia Bancaria\n\n'
-        : '💵 Pago Contra Entrega\n\n';
+        ? `${EMOJI.BANK} Transferencia Bancaria\n\n`
+        : `${EMOJI.CASH} Pago Contra Entrega\n\n`;
 
       if (formData.notes) {
-        message += `*📝 Notas Adicionales:*\n${formData.notes}\n\n`;
+        message += `*${EMOJI.MEMO} Notas Adicionales:*\n${formData.notes}\n\n`;
       }
 
       message += `_Generado desde Arcay3Dlabs - ${new Date().toLocaleString('es-PE')}_`;
 
       // Encode message for URL
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
 
       // 3. GUARDAR EN LOCALSTORAGE (backup)
       const orderId = requestId || `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
