@@ -128,7 +128,7 @@ export default function ProductoPage() {
           {/* Images */}
           <div className="space-y-4 animate-slideInLeft">
             {/* Main Image */}
-            <div className="aspect-square w-full rounded-xl overflow-hidden border-2 border-border bg-muted relative group">
+            <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden">
               <Image
                 src={product.images[selectedImage] || '/placeholder-product.jpg'}
                 alt={product.name}
@@ -136,16 +136,20 @@ export default function ProductoPage() {
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 priority
               />
+              {/* Grid Overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
+                style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+
               {product.featured && (
-                <Badge className="absolute top-4 right-4 bg-gradient-to-r from-primary to-cyan-500 border-0 shadow-lg">
-                  ⭐ Destacado
-                </Badge>
+                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 font-code text-xs font-bold uppercase shadow-sm">
+                  ★ DESTACADO
+                </div>
               )}
               {product.stock === 0 && (
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                  <Badge variant="destructive" className="text-lg px-6 py-3">
-                    Agotado
-                  </Badge>
+                  <div className="border-2 border-destructive text-destructive px-6 py-3 font-code text-2xl font-bold uppercase tracking-widest -rotate-12 bg-background/90">
+                    AGOTADO
+                  </div>
                 </div>
               )}
             </div>
@@ -157,9 +161,9 @@ export default function ProductoPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-primary ${selectedImage === index
-                      ? 'border-primary ring-2 ring-primary/20'
-                      : 'border-border'
+                    className={`aspect-square border-2 transition-all hover:border-primary ${selectedImage === index
+                      ? 'border-primary ring-1 ring-primary/20 scale-95'
+                      : 'border-border opacity-70 hover:opacity-100'
                       }`}
                   >
                     <div className="relative w-full h-full">
@@ -181,16 +185,16 @@ export default function ProductoPage() {
             {/* Title & Category */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className="text-primary border-primary">
-                  {product.category}
-                </Badge>
+                <span className="text-xs font-code text-primary uppercase tracking-wider border border-primary/20 px-2 py-0.5 bg-primary/5">
+                  CAT: {product.category}
+                </span>
                 {product.stock > 0 && product.stock <= 5 && (
-                  <Badge variant="outline" className="border-orange-500 text-orange-500">
-                    ¡Solo {product.stock} disponibles!
-                  </Badge>
+                  <span className="text-xs font-code text-orange-500 uppercase tracking-wider border border-orange-500/20 px-2 py-0.5 bg-orange-500/5">
+                    ⚠ STOCK_BAJO: {product.stock}
+                  </span>
                 )}
               </div>
-              <h1 className="font-headline text-3xl md:text-4xl font-bold mb-2">
+              <h1 className="font-headline text-3xl md:text-5xl font-bold mb-2 tracking-tight uppercase">
                 {product.name}
               </h1>
 
@@ -219,49 +223,50 @@ export default function ProductoPage() {
 
             <Separator />
 
-            {/* Quantity Selector */}
-            <div>
-              <p className="text-sm font-medium mb-3">Cantidad</p>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border-2 rounded-lg">
+            {/* Quantity Selector - Control Panel Style */}
+            <div className="bg-secondary/30 p-4 border border-border">
+              <p className="text-xs font-code uppercase text-muted-foreground mb-3 tracking-wider">CANTIDAD OPERATIVA</p>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border border-border bg-background">
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={decrementQuantity}
+                    onclick={decrementQuantity}
                     disabled={quantity <= 1}
-                    className="h-10 w-10"
+                    className="h-12 w-12 rounded-none hover:bg-destructive hover:text-destructive-foreground border-r border-border"
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="px-6 font-semibold text-lg">{quantity}</span>
+                  <span className="w-16 text-center font-code text-xl font-bold">{quantity}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={incrementQuantity}
+                    onclick={incrementQuantity}
                     disabled={!product.stock || quantity >= product.stock}
-                    className="h-10 w-10"
+                    className="h-12 w-12 rounded-none hover:bg-primary hover:text-primary-foreground border-l border-border"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {product.stock > 0
-                    ? `${product.stock} unidades disponibles`
-                    : 'Sin stock'}
-                </p>
+                <div className="text-xs font-code">
+                  <span className="block text-muted-foreground">ESTADO:</span>
+                  <span className={product.stock > 0 ? 'text-green-500 font-bold uppercase' : 'text-destructive font-bold uppercase'}>
+                    {product.stock > 0 ? 'DISPONIBLE' : 'NO_DISPONIBLE'}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Add to Cart */}
-            <div className="flex gap-3">
+            <div className="flex gap-0 border border-border p-1 bg-secondary/10">
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 gradient-primary shadow-glow hover:shadow-glow-lg transition-all duration-300 h-12 text-lg"
+                className="flex-1 gradient-primary shadow-none hover:brightness-110 active:translate-y-[1px] transition-all duration-75 h-14 text-lg font-code uppercase tracking-widest rounded-none border-0"
                 size="lg"
               >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                {product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
+                <ShoppingCart className="mr-3 h-5 w-5" />
+                {product.stock === 0 ? 'ESTADO: AGOTADO' : 'INICIAR PEDIDO'}
               </Button>
             </div>
 
@@ -311,99 +316,113 @@ export default function ProductoPage() {
           </div>
         </div>
 
-        {/* Product Tabs */}
+        {/* Product Tabs - Datasheet Style */}
         <div className="mb-16 animate-fadeIn">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
-              <TabsTrigger value="description">Descripción</TabsTrigger>
-              <TabsTrigger value="specs">Especificaciones</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 max-w-md mb-0 border border-border bg-background p-0 rounded-none h-12">
+              <TabsTrigger
+                value="description"
+                className="rounded-none border-r border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-code uppercase tracking-wider h-full"
+              >
+                1.0 // SINOPSIS
+              </TabsTrigger>
+              <TabsTrigger
+                value="specs"
+                className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-code uppercase tracking-wider h-full"
+              >
+                2.0 // ESPECIFICACIONES
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="description">
-              <Card className="border-2">
-                <CardContent className="p-6 md:p-8">
-                  <h3 className="text-xl font-semibold mb-4">Sobre este producto</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {product.description}
-                  </p>
-                  <div className="mt-6 space-y-3">
-                    <h4 className="font-semibold">Características:</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">Impreso con tecnología de última generación</span>
+            <div className="border border-border border-t-0 p-6 md:p-8 bg-background relative">
+              {/* Technical Corner Markers */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary" />
+              <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-primary" />
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-primary" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary" />
+
+              <TabsContent value="description" className="mt-0">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-code text-primary uppercase mb-4 tracking-widest border-b border-border pb-2 inline-block">
+                      1.1 // RESUMEN GENERAL
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed font-sans text-lg">
+                      {product.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-8">
+                    <h4 className="text-sm font-code text-muted-foreground uppercase mb-4 tracking-widest">
+                      1.2 // CARACTERÍSTICAS
+                    </h4>
+                    <ul className="grid sm:grid-cols-2 gap-3">
+                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
+                        <div className="h-1.5 w-1.5 bg-primary" />
+                        <span className="text-sm font-medium">Tolerancia: ±0.1mm</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">Material de alta calidad: {product.material}</span>
+                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
+                        <div className="h-1.5 w-1.5 bg-primary" />
+                        <span className="text-sm font-medium">Grado Material: {product.material}</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">Acabado profesional y duradero</span>
+                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
+                        <div className="h-1.5 w-1.5 bg-primary" />
+                        <span className="text-sm font-medium">Acabado: Mate/Texturizado</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">Diseño único y funcional</span>
+                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
+                        <div className="h-1.5 w-1.5 bg-primary" />
+                        <span className="text-sm font-medium">Altura de Capa: 0.2mm Estándar</span>
                       </li>
                     </ul>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+              </TabsContent>
 
-            <TabsContent value="specs">
-              <Card className="border-2">
-                <CardContent className="p-6 md:p-8">
-                  <h3 className="text-xl font-semibold mb-6">Especificaciones Técnicas</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between py-3 border-b">
-                      <div className="flex items-center gap-3">
-                        <Box className="h-5 w-5 text-primary" />
-                        <span className="font-medium">Material</span>
-                      </div>
-                      <span className="text-muted-foreground">{product.material}</span>
-                    </div>
-                    {product.dimensions && (
-                      <div className="flex items-start justify-between py-3 border-b">
-                        <div className="flex items-center gap-3">
-                          <Ruler className="h-5 w-5 text-primary" />
-                          <span className="font-medium">Dimensiones</span>
-                        </div>
-                        <span className="text-muted-foreground">
-                          {product.dimensions.width} × {product.dimensions.height} ×{' '}
-                          {product.dimensions.depth} cm
-                        </span>
-                      </div>
-                    )}
-                    {product.weight && (
-                      <div className="flex items-start justify-between py-3 border-b">
-                        <div className="flex items-center gap-3">
-                          <Weight className="h-5 w-5 text-primary" />
-                          <span className="font-medium">Peso</span>
-                        </div>
-                        <span className="text-muted-foreground">{product.weight}g</span>
-                      </div>
-                    )}
-                    <div className="flex items-start justify-between py-3 border-b">
-                      <div className="flex items-center gap-3">
-                        <Package className="h-5 w-5 text-primary" />
-                        <span className="font-medium">Categoría</span>
-                      </div>
-                      <span className="text-muted-foreground">{product.category}</span>
-                    </div>
-                    <div className="flex items-start justify-between py-3">
-                      <div className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary" />
-                        <span className="font-medium">Stock</span>
-                      </div>
-                      <span className={product.stock > 0 ? 'text-green-600' : 'text-destructive'}>
-                        {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+              <TabsContent value="specs" className="mt-0">
+                <div className="overflow-hidden border border-border">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-secondary/30 text-muted-foreground font-code uppercase text-xs">
+                      <tr>
+                        <th className="px-4 py-3 border-b border-r border-border w-1/3">PARÁMETRO</th>
+                        <th className="px-4 py-3 border-b border-border">VALOR</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border font-code">
+                      <tr>
+                        <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">ID_MATERIAL</td>
+                        <td className="px-4 py-3 text-primary">{product.material}</td>
+                      </tr>
+                      {product.dimensions && (
+                        <tr>
+                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">DIMENSIONES (XYZ)</td>
+                          <td className="px-4 py-3">
+                            {product.dimensions.width}mm x {product.dimensions.height}mm x {product.dimensions.depth}mm
+                          </td>
+                        </tr>
+                      )}
+                      {product.weight && (
+                        <tr>
+                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">PESO_NETO</td>
+                          <td className="px-4 py-3">{product.weight}g</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">REF_CATEGORÍA</td>
+                        <td className="px-4 py-3 uppercase">{product.category}</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">ESTADO_STOCK</td>
+                        <td className="px-4 py-3">
+                          <span className={product.stock > 0 ? 'bg-green-500/10 text-green-500 px-2 py-0.5 border border-green-500/20' : 'bg-destructive/10 text-destructive px-2 py-0.5 border border-destructive/20'}>
+                            {product.stock > 0 ? 'DISPONIBLE' : 'AGOTADO'}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
 

@@ -51,16 +51,16 @@ export function CartSheet() {
 
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-12">
-            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
-              <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+            <div className="w-24 h-24 border-2 border-dashed border-muted-foreground/30 flex items-center justify-center mb-4 bg-secondary/20">
+              <ShoppingCart className="h-10 w-10 text-muted-foreground opacity-50" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Tu carrito está vacío</h3>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Agrega productos de nuestra tienda para comenzar
+            <h3 className="text-lg font-code font-bold mb-2 uppercase tracking-widest text-muted-foreground">ESTADO: INACTIVO</h3>
+            <p className="text-xs font-code text-muted-foreground text-center mb-8 uppercase">
+              [No se detectan componentes en el área]
             </p>
-            <Button asChild onClick={() => setOpen(false)}>
+            <Button asChild onClick={() => setOpen(false)} className="font-code uppercase tracking-wider" size="lg">
               <Link href="/tienda">
-                Explorar Productos
+                {'>'} Explorar Catálogo
               </Link>
             </Button>
           </div>
@@ -75,45 +75,52 @@ export function CartSheet() {
                   return (
                     <div
                       key={item.id}
-                      className="flex gap-4 p-3 rounded-lg border hover:border-primary/50 transition-colors group"
+                      className="flex gap-4 p-3 border border-border bg-background hover:border-primary/50 transition-colors group relative border-layered"
                     >
                       {/* Image */}
-                      <div className="relative w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                      <div className="relative w-20 h-20 border border-border overflow-hidden flex-shrink-0 bg-secondary/50">
                         <Image
                           src={item.images[0] || '/placeholder-product.jpg'}
                           alt={item.name}
                           fill
-                          className="object-cover"
+                          className="object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                         />
                       </div>
 
                       {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-                          {item.name}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {item.category} • {item.material}
-                        </p>
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-headline font-bold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors uppercase">
+                              {item.name}
+                            </h4>
+                          </div>
 
-                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-code text-muted-foreground mb-2 flex gap-2">
+                            <span className="opacity-75">CAT: {item.category}</span>
+                            <span>|</span>
+                            <span className="opacity-75">MAT: {item.material}</span>
+                          </p>
+                        </div>
+
+                        <div className="flex items-end justify-between">
                           {/* Quantity Controls */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center border border-border bg-secondary/20">
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="h-7 w-7"
+                              className="h-6 w-6 rounded-none hover:bg-destructive hover:text-destructive-foreground"
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="text-sm font-medium w-8 text-center">
+                            <span className="text-xs font-code font-medium w-8 text-center bg-background border-x border-border h-6 flex items-center justify-center">
                               {item.quantity}
                             </span>
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="h-7 w-7"
+                              className="h-6 w-6 rounded-none hover:bg-primary hover:text-primary-foreground"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               disabled={item.quantity >= item.stock}
                             >
@@ -123,10 +130,10 @@ export function CartSheet() {
 
                           {/* Price */}
                           <div className="text-right">
-                            <p className="font-bold text-sm gradient-text dark:gradient-text-cyan">{formattedPrice}</p>
+                            <p className="font-code font-bold text-sm text-primary">{formattedPrice}</p>
                             {item.quantity > 1 && (
-                              <p className="text-xs text-muted-foreground">
-                                {formatPrice(item.price)} c/u
+                              <p className="text-[10px] text-muted-foreground font-code">
+                                {formatPrice(item.price)} / UNIDAD
                               </p>
                             )}
                           </div>
@@ -137,10 +144,10 @@ export function CartSheet() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
+                        className="absolute -top-2 -right-2 h-6 w-6 bg-background border border-border text-muted-foreground hover:text-destructive hover:border-destructive rounded-none shadow-sm opacity-0 group-hover:opacity-100 transition-all z-10"
                         onClick={() => removeItem(item.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   );
