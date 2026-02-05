@@ -10,8 +10,8 @@ const processSteps = [
   },
   {
     icon: <Layers className="h-10 w-10" />,
-    title: "Elige el Material",
-    description: "Selecciona entre una amplia gama de materiales como PLA, ABS, Resina y más.",
+    title: "Detalles de Impresión",
+    description: "Trabajamos exclusivamente con PLA para garantizar resultados eco-amigables y precisos.",
     number: "02",
   },
   {

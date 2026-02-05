@@ -82,7 +82,7 @@ export interface GalleryImage {
 
 export type MaterialType = 'PLA' | 'ABS' | 'PETG' | 'Resina' | 'TPU' | 'Otro';
 
-export const MATERIALS: MaterialType[] = ['PLA', 'ABS', 'PETG', 'Resina', 'TPU', 'Otro'];
+export const MATERIALS: MaterialType[] = ['PLA'];
 
 export const PRODUCT_CATEGORIES = [
   'Decoración',

@@ -32,71 +32,74 @@ export function ProductCard({ product }: ProductCardProps) {
   const formattedPrice = formatPrice(product.price);
 
   return (
-    <Card className="overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group border-2 hover:border-primary/50 dark:border-neon-cyan/30 dark:hover:border-neon-cyan/50 dark:bg-card">
-      <Link href={`/productos/${product.id}`}>
-        <CardHeader className="p-0 relative overflow-hidden">
-          <div className="aspect-square w-full relative">
+    <Card className="overflow-hidden bg-background border border-border transition-all duration-300 hover:shadow-lg group relative border-layered">
+      <Link href={`/productos/${product.id}`} className="block h-full flex flex-col">
+        {/* Technical Header */}
+        <div className="border-b border-border bg-secondary/50 px-3 py-1 flex justify-between items-center text-[10px] font-code text-muted-foreground uppercase tracking-wider">
+          <span>ID: {product.id.slice(0, 6)}</span>
+          <span>ESTADO: EN STOCK</span>
+        </div>
+
+        <CardHeader className="p-0 relative border-b border-border">
+          <div className="aspect-square w-full relative bg-zinc-100 dark:bg-zinc-900/50">
             <Image
               src={mainImage}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover p-4 transition-transform duration-500 group-hover:scale-105"
             />
-            {/* Gradient Overlay on Hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Overlay Grid */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
+              style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
 
-            {product.featured && (
-              <Badge className="absolute top-3 right-3 gradient-primary dark:bg-none dark:gradient-cyan dark:text-black border-0 shadow-lg animate-pulse">
-                ⭐ Destacado
-              </Badge>
-            )}
+            {/* Price Tag - Technical Label Style */}
+            <div className="absolute top-0 right-0 bg-primary text-primary-foreground font-code font-bold px-3 py-1 text-sm shadow-sm z-10">
+              {formattedPrice}
+            </div>
+
             {product.stock === 0 && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                <Badge variant="destructive" className="text-lg px-4 py-2">
-                  Agotado
-                </Badge>
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center z-20">
+                <div className="border-2 border-destructive text-destructive font-code font-bold px-4 py-2 uppercase rotate-[-15deg] text-lg">
+                  AGOTADO
+                </div>
               </div>
             )}
-
-            {/* Quick View Button - Shows on Hover */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <Button size="sm" className="gradient-primary dark:bg-none dark:gradient-cyan dark:text-black shadow-glow">
-                Vista Rápida
-              </Button>
-            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 space-y-2">
-          <CardTitle className="font-headline text-lg font-semibold line-clamp-2 group-hover:text-primary dark:group-hover:text-neon-cyan transition-colors">
-            {product.name}
-          </CardTitle>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-primary dark:bg-neon-purple dark:shadow-[0_0_5px_#bd00ff]" />
-              {product.category}
-            </p>
-            {product.stock > 0 && product.stock <= 5 && (
-              <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 dark:bg-orange-500/10">
-                Últimas {product.stock} unidades
-              </Badge>
-            )}
+
+        <CardContent className="p-4 space-y-3 flex-1">
+          <div className="space-y-1">
+            <div className="text-xs font-code text-primary uppercase tracking-tight">{product.category}</div>
+            <CardTitle className="font-headline text-lg font-bold leading-tight group-hover:text-primary transition-colors">
+              {product.name}
+            </CardTitle>
+          </div>
+
+          {/* Specs Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 border border-border/50 p-1 rounded-sm bg-secondary/20">
+              <span className="font-code text-[10px] uppercase opacity-70">Material:</span>
+              <span className="font-medium text-foreground">PLA</span>
+            </div>
+            <div className="flex items-center gap-1 border border-border/50 p-1 rounded-sm bg-secondary/20">
+              <span className="font-code text-[10px] uppercase opacity-70">Entrega:</span>
+              <span className="font-medium text-foreground">24-48h</span>
+            </div>
           </div>
         </CardContent>
+
+        <CardFooter className="p-4 pt-0 mt-auto">
+          <Button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className="w-full font-code text-xs uppercase tracking-wide bg-foreground text-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-sm"
+            size="sm"
+          >
+            <ShoppingCart className="h-3 w-3 mr-2" />
+            {product.stock === 0 ? '> NO DISPONIBLE' : '> AÑADIR AL CARRITO'}
+          </Button>
+        </CardFooter>
       </Link>
-      <CardFooter className="flex gap-2 items-center p-4 pt-0">
-        <div className="flex-1">
-          <p className="text-2xl font-bold gradient-text dark:drop-shadow-[0_0_5px_rgba(0,243,255,0.3)]">{formattedPrice}</p>
-        </div>
-        <Button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className="gradient-primary hover:shadow-glow dark:shadow-[0_0_15px_rgba(0,243,255,0.3)] transition-all duration-300 gap-2 dark:text-black"
-          size="sm"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {product.stock === 0 ? 'Agotado' : 'Agregar'}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

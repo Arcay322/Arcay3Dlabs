@@ -102,16 +102,12 @@ export function QuoteForm() {
               ¿Tienes un <span className="gradient-text dark:gradient-text-cyan-purple">Proyecto</span> en Mente?
             </h2>
             <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
-              Describe tu idea o sube tu modelo 3D. Ofrecemos impresión en PLA, ABS, PETG, Resina y TPU con acabados profesionales.
+              Describe tu idea o sube tu modelo 3D. Ofrecemos servicios de impresión 3D especializados en PLA con gran atención al detalle.
             </p>
             <div className="space-y-2 text-muted-foreground">
-              <h3 className="font-semibold text-primary dark:gradient-text-cyan w-fit">Materiales Disponibles:</h3>
+              <h3 className="font-semibold text-primary dark:gradient-text-cyan w-fit">Material Utilizado:</h3>
               <ul className="list-disc list-inside space-y-1 dark:marker:text-cyan-400">
-                <li><strong>PLA:</strong> Ideal para prototipos y decoración</li>
-                <li><strong>ABS:</strong> Mayor resistencia mecánica</li>
-                <li><strong>PETG:</strong> Flexible y resistente</li>
-                <li><strong>Resina:</strong> Alta precisión y detalles finos</li>
-                <li><strong>TPU:</strong> Flexible y elástico</li>
+                <li><strong>PLA:</strong> Bioplástico ideal para prototipos, decoración y piezas funcionales estándar. Excelente calidad superficial.</li>
               </ul>
             </div>
             <p className="text-muted-foreground">

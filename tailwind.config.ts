@@ -19,12 +19,12 @@ export default {
       fontFamily: {
         body: ['var(--font-roboto)', 'sans-serif'],
         headline: ['var(--font-space)', 'sans-serif'],
-        code: ['monospace'],
+        code: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        'neon-cyan': '#00f3ff',
-        'neon-purple': '#bd00ff',
-        'deep-space': '#050508',
+        'workshop-slate': '#1a1d24',
+        'hotend-orange': '#f97316',
+        'blueprint-blue': '#1e293b',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
