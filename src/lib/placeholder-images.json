@@ -3,7 +3,7 @@
     {
       "id": "hero-image",
       "description": "A close-up shot of a 3D printer head precisely extruding a vibrant blue filament to create a complex geometric object.",
-      "imageUrl": "https://images.unsplash.com/photo-1603974739154-7b055aeec101?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHwzZCUyMHByaW50ZXJ8ZW58MHx8fHwxNzYzMjczNTc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/images/impresora.webp",
       "imageHint": "3d printer"
     },
     {

@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Box, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -43,7 +44,7 @@ export function Header() {
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 group" prefetch={false}>
           <div className="relative">
-            <Box className="h-7 w-7 text-primary dark:text-neon-cyan transition-transform group-hover:rotate-12 duration-300" />
+            <Logo className="h-14 w-14 text-primary dark:text-neon-cyan transition-transform group-hover:rotate-12 duration-300" />
             <div className="absolute inset-0 blur-md bg-primary/20 dark:bg-neon-cyan/20 group-hover:bg-primary/40 dark:group-hover:bg-neon-cyan/40 transition-all duration-300" />
           </div>
           <span className="font-headline text-2xl font-bold text-foreground relative">
@@ -82,7 +83,7 @@ export function Header() {
             <SheetContent side="right">
               <div className="flex flex-col gap-6 p-6">
                 <Link href="/" className="mb-4 flex items-center gap-2" prefetch={false}>
-                  <Box className="h-7 w-7 text-primary dark:text-neon-cyan" />
+                  <Logo className="h-14 w-14 text-primary dark:text-neon-cyan" />
                   <span className="font-headline text-2xl font-bold text-foreground">
                     Arcay3Dlabs
                   </span>

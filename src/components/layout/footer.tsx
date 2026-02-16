@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Box, Instagram, Linkedin } from "lucide-react";
+import { Instagram, Linkedin } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 
 export function Footer() {
@@ -11,7 +12,7 @@ export function Footer() {
           <div className="flex flex-col items-start gap-4 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 group" prefetch={false}>
               <div className="relative">
-                <Box className="h-8 w-8 text-primary dark:text-neon-cyan transition-transform group-hover:rotate-12 duration-300" />
+                <Logo className="h-20 w-20 text-primary dark:text-neon-cyan transition-transform group-hover:rotate-12 duration-300" />
                 <div className="absolute inset-0 blur-md bg-primary/20 dark:bg-neon-cyan/20 group-hover:bg-primary/40 dark:group-hover:bg-neon-cyan/40 transition-all duration-300" />
               </div>
               <span className="font-headline text-2xl font-bold text-foreground">
