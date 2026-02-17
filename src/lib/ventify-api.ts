@@ -224,7 +224,7 @@ function extractWeightFromAttributes(attributes?: Array<{ name: string; value: s
 }
 
 /**
- * Adaptador: Convierte datos de Ventify API al formato interno de Arcay3Dlabs
+ * Adaptador: Convierte datos de Ventify API al formato interno de Arcay3DLabs
  * Transforma VentifyProduct → Product (formato interno)
  */
 export function adaptVentifyProduct(vp: VentifyProduct): Product {

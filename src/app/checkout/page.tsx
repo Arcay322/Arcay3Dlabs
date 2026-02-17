@@ -167,7 +167,7 @@ export default function CheckoutPage() {
         CASH: '\uD83D\uDCB5'
       };
 
-      let message = `*${EMOJI.CART} NUEVO PEDIDO - Arcay3Dlabs*\n\n`;
+      let message = `*${EMOJI.CART} NUEVO PEDIDO - Arcay3DLabs*\n\n`;
 
       // Agregar número de solicitud si existe
       if (requestNumber) {
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
         message += `*${EMOJI.MEMO} Notas Adicionales:*\n${formData.notes}\n\n`;
       }
 
-      message += `_Generado desde Arcay3Dlabs - ${new Date().toLocaleString('es-PE')}_`;
+      message += `_Generado desde Arcay3DLabs - ${new Date().toLocaleString('es-PE')}_`;
 
       // Encode message for URL
       const encodedMessage = encodeURIComponent(message);

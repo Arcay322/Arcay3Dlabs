@@ -48,7 +48,7 @@ export function Header() {
             <div className="absolute inset-0 blur-md bg-primary/20 dark:bg-neon-cyan/20 group-hover:bg-primary/40 dark:group-hover:bg-neon-cyan/40 transition-all duration-300" />
           </div>
           <span className="font-headline text-2xl font-bold text-foreground relative">
-            Arcay3D<span className="gradient-text dark:gradient-text-cyan-purple">labs</span>
+            Arcay<span className="gradient-text dark:gradient-text-cyan-purple">3D</span>Labs
           </span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
@@ -85,7 +85,7 @@ export function Header() {
                 <Link href="/" className="mb-4 flex items-center gap-2" prefetch={false}>
                   <Logo className="h-14 w-14 text-primary dark:text-neon-cyan" />
                   <span className="font-headline text-2xl font-bold text-foreground">
-                    Arcay3Dlabs
+                    Arcay<span className="gradient-text dark:gradient-text-cyan-purple">3D</span>Labs
                   </span>
                 </Link>
                 <nav className="flex flex-col gap-4">

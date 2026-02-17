@@ -1,4 +1,4 @@
-# Arcay3Dlabs Design System: "Digital Forge"
+# Arcay3DLabs Design System: "Digital Forge"
 
 **Intent:** A precision engineering workspace. Not a shop, but a tool for creators.
 **Feel:** Industrial, Tactile, Precise, Raw.

@@ -1,6 +1,6 @@
 // Site configuration
 export const siteConfig = {
-  name: 'Arcay3Dlabs',
+  name: "Arcay3DLabs",
   description: 'De la Idea al Objeto: Impresión 3D de Precisión',
   url: 'https://arcay3dlabs.com', // TODO: Update with your actual domain
 
@@ -15,9 +15,9 @@ export const siteConfig = {
 
   // Social Media
   social: {
-    facebook: 'https://facebook.com/arcay3dlabs',
+    facebook: 'https://www.facebook.com/profile.php?id=61587062077060',
     instagram: 'https://instagram.com/arcay3dlabs',
-    twitter: 'https://twitter.com/arcay3dlabs',
+    tiktok: 'https://tiktok.com/@arcay3dlabs',
   },
 
   // Business Hours

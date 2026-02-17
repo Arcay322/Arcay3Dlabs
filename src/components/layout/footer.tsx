@@ -1,7 +1,28 @@
 import Link from "next/link";
-import { Instagram, Linkedin } from "lucide-react";
+import { Instagram, Facebook, Mail, Clock, MapPin } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
+
+// TikTok Icon Component
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
 
 export function Footer() {
   return (
@@ -16,7 +37,7 @@ export function Footer() {
                 <div className="absolute inset-0 blur-md bg-primary/20 dark:bg-neon-cyan/20 group-hover:bg-primary/40 dark:group-hover:bg-neon-cyan/40 transition-all duration-300" />
               </div>
               <span className="font-headline text-2xl font-bold text-foreground">
-                Arcay3D<span className="gradient-text dark:gradient-text-cyan-purple">labs</span>
+                Arcay<span className="gradient-text dark:gradient-text-cyan-purple">3D</span>Labs
               </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
@@ -24,24 +45,39 @@ export function Footer() {
               Innovación, calidad y dedicación en cada proyecto.
             </p>
             <div className="flex items-center gap-3 mt-2">
+              {/* TikTok */}
               <Button
                 variant="outline"
                 size="icon"
                 asChild
-                className="rounded-full hover:bg-primary dark:hover:bg-neon-cyan hover:text-white dark:hover:text-black transition-all duration-300 hover:scale-110"
+                className="rounded-full hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 hover:scale-110"
               >
-                <Link href="#" target="_blank" rel="noopener noreferrer">
+                <Link href={siteConfig.social.tiktok} target="_blank" rel="noopener noreferrer">
+                  <TikTokIcon className="h-5 w-5" />
+                </Link>
+              </Button>
+
+              {/* Instagram */}
+              <Button
+                variant="outline"
+                size="icon"
+                asChild
+                className="rounded-full hover:bg-gradient-to-r hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737] hover:text-white hover:border-transparent transition-all duration-300 hover:scale-110"
+              >
+                <Link href={siteConfig.social.instagram} target="_blank" rel="noopener noreferrer">
                   <Instagram className="h-5 w-5" />
                 </Link>
               </Button>
+
+              {/* Facebook */}
               <Button
                 variant="outline"
                 size="icon"
                 asChild
-                className="rounded-full hover:bg-primary dark:hover:bg-neon-cyan hover:text-white dark:hover:text-black transition-all duration-300 hover:scale-110"
+                className="rounded-full hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] transition-all duration-300 hover:scale-110"
               >
-                <Link href="#" target="_blank" rel="noopener noreferrer">
-                  <Linkedin className="h-5 w-5" />
+                <Link href={siteConfig.social.facebook} target="_blank" rel="noopener noreferrer">
+                  <Facebook className="h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -79,7 +115,7 @@ export function Footer() {
             <h4 className="font-headline text-lg font-semibold">Contacto</h4>
             <div className="space-y-3 text-sm text-muted-foreground">
               <p className="flex items-start gap-2">
-                <span className="text-primary dark:text-neon-cyan">📧</span>
+                <Mail className="h-4 w-4 text-primary dark:text-neon-cyan mt-1" />
                 <a
                   href="mailto:contacto@arcay3dlabs.com"
                   className="hover:text-primary dark:hover:text-neon-cyan transition-colors underline-offset-4 hover:underline"
@@ -88,11 +124,11 @@ export function Footer() {
                 </a>
               </p>
               <p className="flex items-start gap-2">
-                <span className="text-primary dark:text-neon-cyan">⏰</span>
+                <Clock className="h-4 w-4 text-primary dark:text-neon-cyan mt-1" />
                 <span>Lun - Vie: 9:00 AM - 6:00 PM</span>
               </p>
               <p className="flex items-start gap-2">
-                <span className="text-primary dark:text-neon-cyan">📍</span>
+                <MapPin className="h-4 w-4 text-primary dark:text-neon-cyan mt-1" />
                 <span>Disponible en todo Perú</span>
               </p>
             </div>
@@ -103,7 +139,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-border/50">
           <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
             <p>
-              &copy; {new Date().getFullYear()} <span className="gradient-text dark:gradient-text-cyan-purple font-semibold">Arcay3Dlabs</span>.
+              &copy; {new Date().getFullYear()} <span className="font-semibold text-foreground">Arcay<span className="gradient-text dark:gradient-text-cyan-purple">3D</span>Labs</span>.
               Todos los derechos reservados.
             </p>
             <div className="flex gap-6">

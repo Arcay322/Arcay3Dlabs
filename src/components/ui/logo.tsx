@@ -11,7 +11,7 @@ export function Logo({ className }: LogoProps) {
         <div className={cn("relative aspect-square", className)}>
             <Image
                 src="/images/a3dl_logo.webp"
-                alt="Arcay3Dlabs Logo"
+                alt="Arcay3DLabs Logo"
                 fill
                 className="object-contain"
                 priority

@@ -10,11 +10,16 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from '@/lib/query-client';
 
+import { usePathname } from 'next/navigation';
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isSocialsPage = pathname === '/socials';
+
   return (
     <html lang="es">
       <head>
@@ -32,11 +37,11 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             <CartProvider>
               <div className="flex min-h-screen flex-col bg-background">
-                <Header />
+                {!isSocialsPage && <Header />}
                 <main className="flex-1">
                   {children}
                 </main>
-                <Footer />
+                {!isSocialsPage && <Footer />}
               </div>
               <Toaster />
             </CartProvider>
