@@ -29,9 +29,8 @@ export async function GET(request: NextRequest) {
     if (active) params.set('active', active);
     if (limit) params.set('limit', limit);
 
-    const url = `${VENTIFY_API_URL}/api/public/stores/${ACCOUNT_ID}/products${
-      params.toString() ? `?${params.toString()}` : ''
-    }`;
+    const url = `${VENTIFY_API_URL}/api/public/stores/${ACCOUNT_ID}/products${params.toString() ? `?${params.toString()}` : ''
+      }`;
 
     console.log('📥 Fetching products from Ventify:', url);
 
@@ -53,8 +52,8 @@ export async function GET(request: NextRequest) {
         method: 'GET',
         headers,
         signal: controller.signal,
-        // Cache por 5 minutos
-        next: { revalidate: 300 },
+        // Cache por 1 minuto
+        next: { revalidate: 60 },
       });
 
       clearTimeout(timeoutId);
@@ -74,16 +73,16 @@ export async function GET(request: NextRequest) {
 
       console.log(`✅ Got ${result.data?.length || 0} products from Ventify`);
 
-      return NextResponse.json(result, { 
+      return NextResponse.json(result, {
         status: 200,
         headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
         },
       });
 
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
-      
+
       if (fetchError.name === 'AbortError') {
         return NextResponse.json(
           { success: false, error: 'Timeout al obtener productos' },

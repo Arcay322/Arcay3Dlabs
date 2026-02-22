@@ -219,7 +219,7 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
 
       // 3. Adaptar los datos al formato interno
       const adapted = ventifyProducts.map(adaptVentifyProduct);
-      
+
       // 4. Aplicar filtro de featured si es necesario
       let filtered = adapted;
       if (filters?.featured !== undefined) {
@@ -231,16 +231,16 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
       return filtered;
     },
     retry: 1, // Reintentar solo una vez
-    staleTime: 5 * 60 * 1000, // 5 minutos - datos frescos
+    staleTime: 1 * 60 * 1000, // 1 minuto - datos frescos
   });
 
   // FALLBACK: Si hay error, usar datos mock
   const products = isError ? (() => {
     console.error('[useProducts] ❌ Error detectado:', error);
     console.warn('[useProducts] ⚠️ Usando datos FALLBACK (mock)');
-    
+
     let fallback = [...FALLBACK_PRODUCTS];
-    
+
     // Aplicar filtros al fallback
     if (filters?.category) {
       fallback = fallback.filter(p => p.category === filters.category);
@@ -251,15 +251,15 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
     if (filters?.limitCount) {
       fallback = fallback.slice(0, filters.limitCount);
     }
-    
+
     return fallback;
   })() : (data || []);
 
-  return { 
-    products, 
-    loading: isLoading, 
-    error: error as Error | null, 
-    usingFallback: isError 
+  return {
+    products,
+    loading: isLoading,
+    error: error as Error | null,
+    usingFallback: isError
   };
 }
 
