@@ -244,7 +244,7 @@ export function adaptVentifyProduct(vp: VentifyProduct): Product {
       ? vp.galleryImages
       : vp.imageUrl && vp.imageUrl.length > 0
         ? [vp.imageUrl]
-        : ['data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e2e8f0"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%23475569"%3ESin Imagen%3C/text%3E%3C/svg%3E'],
+        : ['/images/a3dl_logo.webp'],
 
     stock: vp.stock,
     // Marcar como destacado si: 1) tiene el flag isFeatured, O 2) tiene stock disponible (temporal)

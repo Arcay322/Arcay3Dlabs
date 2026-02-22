@@ -42,12 +42,20 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <CardHeader className="p-0 relative border-b border-border">
           <div className="aspect-square w-full relative bg-zinc-100 dark:bg-zinc-900/50">
-            <Image
-              src={mainImage}
-              alt={product.name}
-              fill
-              className="object-cover p-4 transition-transform duration-500 group-hover:scale-105"
-            />
+            {mainImage.startsWith('data:image') ? (
+              <img
+                src={mainImage}
+                alt={product.name}
+                className="w-full h-full object-cover p-4 transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <Image
+                src={mainImage}
+                alt={product.name}
+                fill
+                className="object-cover p-4 transition-transform duration-500 group-hover:scale-105"
+              />
+            )}
             {/* Overlay Grid */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
               style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
