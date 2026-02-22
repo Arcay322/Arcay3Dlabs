@@ -202,9 +202,9 @@ function getMaterialFromCategory(category: string): string {
 function extractDimensionsFromAttributes(attributes?: Array<{ name: string; value: string }>) {
   if (!attributes) return { width: 10, height: 10, depth: 10 };
 
-  const width = attributes.find(a => a.name.toLowerCase().includes('ancho'))?.value;
-  const height = attributes.find(a => a.name.toLowerCase().includes('alto'))?.value;
-  const depth = attributes.find(a => a.name.toLowerCase().includes('profundidad'))?.value;
+  const width = attributes.find(a => a.name?.toLowerCase().includes('ancho'))?.value;
+  const height = attributes.find(a => a.name?.toLowerCase().includes('alto'))?.value;
+  const depth = attributes.find(a => a.name?.toLowerCase().includes('profundidad'))?.value;
 
   return {
     width: width ? parseInt(width) : 10,
@@ -219,7 +219,7 @@ function extractDimensionsFromAttributes(attributes?: Array<{ name: string; valu
 function extractWeightFromAttributes(attributes?: Array<{ name: string; value: string }>): number {
   if (!attributes) return 100;
 
-  const weight = attributes.find(a => a.name.toLowerCase().includes('peso'))?.value;
+  const weight = attributes.find(a => a.name?.toLowerCase().includes('peso'))?.value;
   return weight ? parseInt(weight) : 100;
 }
 
