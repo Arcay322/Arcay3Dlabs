@@ -87,7 +87,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1 border border-border/50 p-1 rounded-sm bg-secondary/20">
               <span className="font-code text-[10px] uppercase opacity-70">Material:</span>
-              <span className="font-medium text-foreground">PLA</span>
+              <span className="font-medium text-foreground">{product.material || 'PLA'}</span>
             </div>
             <div className="flex items-center gap-1 border border-border/50 p-1 rounded-sm bg-secondary/20">
               <span className="font-code text-[10px] uppercase opacity-70">Entrega:</span>

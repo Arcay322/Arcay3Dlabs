@@ -104,14 +104,32 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // 0. VALIDAR STOCK EN TIEMPO REAL
+      const ventifyApi = new VentifyAPI();
+
+      try {
+        for (const item of items) {
+          const product = await ventifyApi.getProduct(item.id);
+          if (product.stock < item.quantity) {
+            toast({
+              variant: 'destructive',
+              title: 'Stock insuficiente',
+              description: `"${item.name}" solo tiene ${product.stock} unidades disponibles.`,
+            });
+            setIsProcessing(false);
+            return;
+          }
+        }
+      } catch (stockError) {
+        console.warn('⚠️ No se pudo verificar stock, continuando...', stockError);
+        // Continuar si no se puede verificar (la API podría estar caída)
+      }
+
       // 1. ENVIAR SOLICITUD DE VENTA A VENTIFY
       let requestId = '';
       let requestNumber = '';
 
       try {
-        // ✅ Usar la clase VentifyAPI que maneja el proxy de forma segura
-        const ventifyApi = new VentifyAPI();
-
         const saleRequestData = {
           customerName: formData.fullName,
           customerEmail: formData.email,
@@ -119,7 +137,7 @@ export default function CheckoutPage() {
           items: items.map(item => ({
             productId: item.id,
             productName: item.name,
-            sku: item.id, // Usar ID como SKU
+            sku: (item as any).sku || item.id,
             quantity: item.quantity,
             price: item.price,
           })),

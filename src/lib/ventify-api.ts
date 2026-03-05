@@ -20,10 +20,17 @@ export interface VentifyProduct {
   imageUrl: string
   description: string
   supplier?: string
-  // Campos opcionales nuevos de la API
+  // Campos de integración avanzada
   attributes?: Array<{ name: string; value: string }>;
   galleryImages?: string[];
   isFeatured?: boolean;
+
+  // E-commerce Fields
+  slug?: string;
+  tags?: string[];
+  dimensions?: { length: number; width: number; height: number };
+  weight?: number;
+  seo?: { metaTitle?: string; metaDescription?: string };
 }
 
 export interface VentifyQuote {
@@ -204,7 +211,7 @@ function extractDimensionsFromAttributes(attributes?: Array<{ name: string; valu
 
   const width = attributes.find(a => a.name?.toLowerCase().includes('ancho'))?.value;
   const height = attributes.find(a => a.name?.toLowerCase().includes('alto'))?.value;
-  const depth = attributes.find(a => a.name?.toLowerCase().includes('profundidad'))?.value;
+  const depth = attributes.find(a => a.name?.toLowerCase().includes('profundidad') || a.name?.toLowerCase().includes('largo'))?.value;
 
   return {
     width: width ? parseInt(width) : 10,
@@ -224,6 +231,22 @@ function extractWeightFromAttributes(attributes?: Array<{ name: string; value: s
 }
 
 /**
+ * Helper: extraer material desde attributes o inferir desde categoría
+ */
+function getMaterialFromProduct(vp: VentifyProduct): string {
+  // 1. Buscar material en atributos
+  if (vp.attributes && vp.attributes.length > 0) {
+    const materialAttr = vp.attributes.find(a =>
+      a.name?.toLowerCase().includes('material')
+    );
+    if (materialAttr?.value) return materialAttr.value;
+  }
+
+  // 2. Fallback: inferir desde categoría
+  return getMaterialFromCategory(vp.category);
+}
+
+/**
  * Adaptador: Convierte datos de Ventify API al formato interno de Arcay3DLabs
  * Transforma VentifyProduct → Product (formato interno)
  */
@@ -235,11 +258,10 @@ export function adaptVentifyProduct(vp: VentifyProduct): Product {
     price: vp.price,
     category: vp.category,
 
-    // Inferir material desde categoría
-    material: getMaterialFromCategory(vp.category),
+    // Extraer material desde atributos o inferir desde categoría
+    material: getMaterialFromProduct(vp),
 
     // Manejar imágenes (priorizar galleryImages si existe)
-    // Si no hay imagen, usar data URI para evitar errores de carga externa
     images: vp.galleryImages && vp.galleryImages.length > 0
       ? vp.galleryImages
       : vp.imageUrl && vp.imageUrl.length > 0
@@ -247,16 +269,21 @@ export function adaptVentifyProduct(vp: VentifyProduct): Product {
         : ['/images/a3dl_logo.webp'],
 
     stock: vp.stock,
-    // Marcar como destacado si: 1) tiene el flag isFeatured, O 2) tiene stock disponible (temporal)
-    featured: vp.isFeatured || vp.inStock,
+    // Solo usar isFeatured del backend, no inferir de stock
+    featured: vp.isFeatured || false,
 
     // Timestamps - usar fecha actual como fallback
     createdAt: new Date(),
     updatedAt: new Date(),
 
-    // Extraer de attributes o usar defaults
-    dimensions: extractDimensionsFromAttributes(vp.attributes),
-    weight: extractWeightFromAttributes(vp.attributes),
+    // Extraer de attributes o usar defaults, priorizando dimensiones nativas
+    dimensions: vp.dimensions ? { width: vp.dimensions.width, height: vp.dimensions.height, depth: vp.dimensions.length } : extractDimensionsFromAttributes(vp.attributes),
+    weight: vp.weight || extractWeightFromAttributes(vp.attributes),
+
+    // Custom E-commerce mapping
+    slug: vp.slug,
+    tags: vp.tags || [],
+    seo: vp.seo || undefined,
   };
 }
 

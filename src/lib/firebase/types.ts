@@ -18,6 +18,14 @@ export interface Product {
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;
+
+  // E-commerce Fields
+  slug?: string;
+  tags?: string[];
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+  };
 }
 
 export interface QuoteRequest {
