@@ -140,6 +140,10 @@ export default function CheckoutPage() {
             sku: (item as any).sku || item.id,
             quantity: item.quantity,
             price: item.price,
+            ...(item.selectedVariant ? {
+              variantId: item.selectedVariant.id,
+              variantName: item.selectedVariant.name,
+            } : {}),
           })),
           shippingAddress: {
             street: formData.address,
@@ -199,7 +203,8 @@ export default function CheckoutPage() {
 
       message += `*${EMOJI.BOX} Productos:*\n`;
       items.forEach((item, index) => {
-        message += `${index + 1}. ${item.name}\n`;
+        const variantText = item.selectedVariant ? ` (${item.selectedVariant.name})` : '';
+        message += `${index + 1}. ${item.name}${variantText}\n`;
         message += `   Cantidad: ${item.quantity}\n`;
         message += `   Precio: S/ ${item.price.toFixed(2)} c/u\n`;
         message += `   Subtotal: S/ ${(item.price * item.quantity).toFixed(2)}\n\n`;
@@ -245,6 +250,10 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           price: item.price,
           total: item.price * item.quantity,
+          ...(item.selectedVariant ? {
+            variantId: item.selectedVariant.id,
+            variantName: item.selectedVariant.name,
+          } : {}),
         })),
         shippingAddress: {
           street: formData.address,
@@ -583,6 +592,19 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm line-clamp-2">{item.name}</p>
+                          {item.selectedVariant && (
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {item.selectedVariant.colorHex && (
+                                <span
+                                  className="inline-block w-3 h-3 rounded-full border border-border"
+                                  style={{ backgroundColor: item.selectedVariant.colorHex }}
+                                />
+                              )}
+                              <span className="text-xs text-muted-foreground">
+                                {item.selectedVariant.name}
+                              </span>
+                            </div>
+                          )}
                           <p className="text-sm text-muted-foreground">
                             Cantidad: {item.quantity}
                           </p>

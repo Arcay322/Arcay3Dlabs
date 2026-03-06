@@ -19,6 +19,10 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
 
+  // Campos de integración con Ventify
+  sku?: string;
+  attributes?: Array<{ name: string; value: string }>;
+
   // E-commerce Fields
   slug?: string;
   tags?: string[];
@@ -26,6 +30,20 @@ export interface Product {
     metaTitle?: string;
     metaDescription?: string;
   };
+
+  // Variantes de producto (colores, versiones)
+  variants?: ProductVariant[];
+}
+
+/** Variante de un producto para la tienda */
+export interface ProductVariant {
+  id: string;
+  name: string;
+  colorHex?: string;
+  images: string[];
+  stock: number;
+  priceAdjustment: number;
+  sku?: string;
 }
 
 export interface QuoteRequest {

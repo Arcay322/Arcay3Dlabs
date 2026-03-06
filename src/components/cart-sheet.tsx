@@ -96,6 +96,20 @@ export function CartSheet() {
                             </h4>
                           </div>
 
+                          {item.selectedVariant && (
+                            <div className="flex items-center gap-1.5 mb-1">
+                              {item.selectedVariant.colorHex && (
+                                <span
+                                  className="inline-block w-2.5 h-2.5 rounded-full border border-border"
+                                  style={{ backgroundColor: item.selectedVariant.colorHex }}
+                                />
+                              )}
+                              <span className="text-[10px] font-code text-muted-foreground uppercase">
+                                {item.selectedVariant.name}
+                              </span>
+                            </div>
+                          )}
+
                           <p className="text-[10px] font-code text-muted-foreground mb-2 flex gap-2">
                             <span className="opacity-75">CAT: {item.category}</span>
                             <span>|</span>
@@ -110,7 +124,7 @@ export function CartSheet() {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6 rounded-none hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedVariant?.id)}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -121,8 +135,8 @@ export function CartSheet() {
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6 rounded-none hover:bg-primary hover:text-primary-foreground"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.stock}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedVariant?.id)}
+                              disabled={item.quantity >= (item.selectedVariant?.stock ?? item.stock)}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -145,7 +159,7 @@ export function CartSheet() {
                         variant="ghost"
                         size="icon"
                         className="absolute -top-2 -right-2 h-6 w-6 bg-background border border-border text-muted-foreground hover:text-destructive hover:border-destructive rounded-none shadow-sm opacity-0 group-hover:opacity-100 transition-all z-10"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, item.selectedVariant?.id)}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>

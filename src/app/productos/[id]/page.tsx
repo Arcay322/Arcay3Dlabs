@@ -28,7 +28,7 @@ import {
   Check,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import type { Product } from '@/lib/firebase/types';
+import type { Product, ProductVariant } from '@/lib/firebase/types';
 
 export default function ProductoPage() {
   const params = useParams();
@@ -40,29 +40,62 @@ export default function ProductoPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   useEffect(() => {
     if (!loading && products.length > 0) {
       const foundProduct = products.find((p) => p.id === params.id);
       if (foundProduct) {
         setProduct(foundProduct);
+        // Auto-seleccionar la primera variante si existe
+        if (foundProduct.variants && foundProduct.variants.length > 0) {
+          setSelectedVariant(foundProduct.variants[0]);
+        }
       }
     }
   }, [params.id, products, loading]);
 
+  // Imágenes a mostrar: de la variante seleccionada (si tiene) o del producto
+  const displayImages = selectedVariant && selectedVariant.images.length > 0
+    ? selectedVariant.images
+    : product?.images || [];
+
+  // Stock disponible: de la variante o del producto
+  const availableStock = selectedVariant ? selectedVariant.stock : (product?.stock || 0);
+
+  // Precio final: precio base + ajuste de variante
+  const finalPrice = product ? product.price + (selectedVariant?.priceAdjustment || 0) : 0;
+
+  const handleSelectVariant = (variant: ProductVariant) => {
+    setSelectedVariant(variant);
+    setSelectedImage(0); // Reset a primera imagen de la variante
+    setQuantity(1); // Reset cantidad
+  };
+
   const handleAddToCart = () => {
     if (!product) return;
 
-    addItem(product, quantity);
+    // Si el producto tiene variantes, se debe seleccionar una
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast({
+        title: 'Selecciona una variante',
+        description: 'Por favor elige un color/versión antes de agregar al carrito',
+        variant: 'destructive',
+      });
+      return;
+    }
 
+    addItem(product, quantity, selectedVariant || undefined);
+
+    const variantText = selectedVariant ? ` (${selectedVariant.name})` : '';
     toast({
       title: '¡Producto agregado!',
-      description: `${quantity}x ${product.name} agregado al carrito`,
+      description: `${quantity}x ${product.name}${variantText} agregado al carrito`,
     });
   };
 
   const incrementQuantity = () => {
-    if (product && quantity < product.stock) {
+    if (quantity < availableStock) {
       setQuantity(prev => prev + 1);
     }
   };
@@ -108,7 +141,7 @@ export default function ProductoPage() {
     );
   }
 
-  const formattedPrice = formatPrice(product.price);
+  const formattedPrice = formatPrice(finalPrice);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
@@ -130,7 +163,7 @@ export default function ProductoPage() {
             {/* Main Image */}
             <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden">
               <Image
-                src={product.images[selectedImage] || '/placeholder-product.jpg'}
+                src={displayImages[selectedImage] || '/placeholder-product.jpg'}
                 alt={product.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -155,9 +188,9 @@ export default function ProductoPage() {
             </div>
 
             {/* Thumbnails */}
-            {product.images.length > 1 && (
+            {displayImages.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
-                {product.images.map((image, index) => (
+                {displayImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -219,7 +252,65 @@ export default function ProductoPage() {
             <div>
               <p className="text-sm text-muted-foreground mb-2">Precio</p>
               <p className="text-4xl font-bold gradient-text">{formattedPrice}</p>
+              {selectedVariant && selectedVariant.priceAdjustment !== 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Precio base: {formatPrice(product.price)} {selectedVariant.priceAdjustment > 0 ? '+' : ''}{formatPrice(selectedVariant.priceAdjustment)} por variante "{selectedVariant.name}"
+                </p>
+              )}
             </div>
+
+            {/* Variant Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <p className="text-xs font-code uppercase text-muted-foreground tracking-wider">
+                    SELECCIONAR VARIANTE
+                    {selectedVariant && (
+                      <span className="ml-2 text-primary font-bold">→ {selectedVariant.name}</span>
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variants.map((variant) => {
+                      const isSelected = selectedVariant?.id === variant.id;
+                      const isOutOfStock = variant.stock === 0;
+                      return (
+                        <button
+                          key={variant.id}
+                          onClick={() => !isOutOfStock && handleSelectVariant(variant)}
+                          disabled={isOutOfStock}
+                          className={`
+                            relative flex items-center gap-2 px-3 py-2 border-2 transition-all
+                            ${isSelected
+                              ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                              : isOutOfStock
+                                ? 'border-border/50 opacity-50 cursor-not-allowed'
+                                : 'border-border hover:border-primary/50 cursor-pointer'
+                            }
+                          `}
+                          title={isOutOfStock ? 'Agotado' : variant.name}
+                        >
+                          {/* Color swatch */}
+                          {variant.colorHex && (
+                            <span
+                              className="w-5 h-5 rounded-full border border-border/50 flex-shrink-0"
+                              style={{ backgroundColor: variant.colorHex }}
+                            />
+                          )}
+                          <span className="text-sm font-medium">{variant.name}</span>
+                          {isOutOfStock && (
+                            <span className="text-[10px] font-code text-destructive">AGOTADO</span>
+                          )}
+                          {isSelected && (
+                            <Check className="h-3.5 w-3.5 text-primary" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
 
             <Separator />
 
@@ -231,7 +322,7 @@ export default function ProductoPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onclick={decrementQuantity}
+                    onClick={decrementQuantity}
                     disabled={quantity <= 1}
                     className="h-12 w-12 rounded-none hover:bg-destructive hover:text-destructive-foreground border-r border-border"
                   >
@@ -241,8 +332,8 @@ export default function ProductoPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onclick={incrementQuantity}
-                    disabled={!product.stock || quantity >= product.stock}
+                    onClick={incrementQuantity}
+                    disabled={!availableStock || quantity >= availableStock}
                     className="h-12 w-12 rounded-none hover:bg-primary hover:text-primary-foreground border-l border-border"
                   >
                     <Plus className="h-4 w-4" />
@@ -250,8 +341,8 @@ export default function ProductoPage() {
                 </div>
                 <div className="text-xs font-code">
                   <span className="block text-muted-foreground">ESTADO:</span>
-                  <span className={product.stock > 0 ? 'text-green-500 font-bold uppercase' : 'text-destructive font-bold uppercase'}>
-                    {product.stock > 0 ? 'DISPONIBLE' : 'NO_DISPONIBLE'}
+                  <span className={availableStock > 0 ? 'text-green-500 font-bold uppercase' : 'text-destructive font-bold uppercase'}>
+                    {availableStock > 0 ? 'DISPONIBLE' : 'NO_DISPONIBLE'}
                   </span>
                 </div>
               </div>
@@ -261,12 +352,12 @@ export default function ProductoPage() {
             <div className="flex gap-0 border border-border p-1 bg-secondary/10">
               <Button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={availableStock === 0}
                 className="flex-1 gradient-primary shadow-none hover:brightness-110 active:translate-y-[1px] transition-all duration-75 h-14 text-lg font-code uppercase tracking-widest rounded-none border-0"
                 size="lg"
               >
                 <ShoppingCart className="mr-3 h-5 w-5" />
-                {product.stock === 0 ? 'ESTADO: AGOTADO' : 'INICIAR PEDIDO'}
+                {availableStock === 0 ? 'ESTADO: AGOTADO' : 'INICIAR PEDIDO'}
               </Button>
             </div>
 
@@ -318,19 +409,19 @@ export default function ProductoPage() {
 
         {/* Product Tabs - Datasheet Style */}
         <div className="mb-16 animate-fadeIn">
-          <Tabs defaultValue="description" className="w-full">
+          <Tabs defaultValue="specs" className="w-full">
             <TabsList className="grid w-full grid-cols-2 max-w-md mb-0 border border-border bg-background p-0 rounded-none h-12">
               <TabsTrigger
-                value="description"
+                value="specs"
                 className="rounded-none border-r border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-code uppercase tracking-wider h-full"
               >
-                1.0 // SINOPSIS
+                1.0 // ESPECIFICACIONES
               </TabsTrigger>
               <TabsTrigger
-                value="specs"
+                value="description"
                 className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-code uppercase tracking-wider h-full"
               >
-                2.0 // ESPECIFICACIONES
+                2.0 // DESCRIPCIÓN
               </TabsTrigger>
             </TabsList>
 
@@ -341,43 +432,7 @@ export default function ProductoPage() {
               <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-primary" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary" />
 
-              <TabsContent value="description" className="mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-code text-primary uppercase mb-4 tracking-widest border-b border-border pb-2 inline-block">
-                      1.1 // RESUMEN GENERAL
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed font-sans text-lg">
-                      {product.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-8">
-                    <h4 className="text-sm font-code text-muted-foreground uppercase mb-4 tracking-widest">
-                      1.2 // CARACTERÍSTICAS
-                    </h4>
-                    <ul className="grid sm:grid-cols-2 gap-3">
-                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
-                        <div className="h-1.5 w-1.5 bg-primary" />
-                        <span className="text-sm font-medium">Tolerancia: ±0.1mm</span>
-                      </li>
-                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
-                        <div className="h-1.5 w-1.5 bg-primary" />
-                        <span className="text-sm font-medium">Grado Material: {product.material}</span>
-                      </li>
-                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
-                        <div className="h-1.5 w-1.5 bg-primary" />
-                        <span className="text-sm font-medium">Acabado: Mate/Texturizado</span>
-                      </li>
-                      <li className="flex items-center gap-3 border border-border/50 p-2 bg-secondary/5">
-                        <div className="h-1.5 w-1.5 bg-primary" />
-                        <span className="text-sm font-medium">Altura de Capa: 0.2mm Estándar</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </TabsContent>
-
+              {/* Tab: Especificaciones Técnicas */}
               <TabsContent value="specs" className="mt-0">
                 <div className="overflow-hidden border border-border">
                   <table className="w-full text-sm text-left">
@@ -388,22 +443,10 @@ export default function ProductoPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border font-code">
-                      <tr>
-                        <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">ID_MATERIAL</td>
-                        <td className="px-4 py-3 text-primary">{product.material}</td>
-                      </tr>
-                      {product.dimensions && (
+                      {product.sku && (
                         <tr>
-                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">DIMENSIONES (XYZ)</td>
-                          <td className="px-4 py-3">
-                            {product.dimensions.width}mm x {product.dimensions.height}mm x {product.dimensions.depth}mm
-                          </td>
-                        </tr>
-                      )}
-                      {product.weight && (
-                        <tr>
-                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">PESO_NETO</td>
-                          <td className="px-4 py-3">{product.weight}g</td>
+                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">REF_SKU</td>
+                          <td className="px-4 py-3 uppercase">{product.sku}</td>
                         </tr>
                       )}
                       <tr>
@@ -411,15 +454,106 @@ export default function ProductoPage() {
                         <td className="px-4 py-3 uppercase">{product.category}</td>
                       </tr>
                       <tr>
+                        <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">ID_MATERIAL</td>
+                        <td className="px-4 py-3 text-primary">{product.material}</td>
+                      </tr>
+                      {product.dimensions && (product.dimensions.width > 0 || product.dimensions.height > 0 || product.dimensions.depth > 0) && (
+                        <tr>
+                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">
+                            <span className="flex items-center gap-2"><Ruler className="h-3.5 w-3.5" /> DIMENSIONES</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {product.dimensions.width}cm × {product.dimensions.height}cm × {product.dimensions.depth}cm
+                          </td>
+                        </tr>
+                      )}
+                      {product.weight && product.weight > 0 && (
+                        <tr>
+                          <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">
+                            <span className="flex items-center gap-2"><Weight className="h-3.5 w-3.5" /> PESO_NETO</span>
+                          </td>
+                          <td className="px-4 py-3">{product.weight}g</td>
+                        </tr>
+                      )}
+                      {/* Atributos adicionales (excluyendo material que ya se muestra arriba) */}
+                      {product.attributes && product.attributes
+                        .filter(attr => !attr.name.toLowerCase().includes('material'))
+                        .map((attr, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground uppercase">
+                              {attr.name.replace(/\s+/g, '_')}
+                            </td>
+                            <td className="px-4 py-3">{attr.value}</td>
+                          </tr>
+                        ))}
+                      <tr>
                         <td className="px-4 py-3 border-r border-border font-semibold text-muted-foreground">ESTADO_STOCK</td>
                         <td className="px-4 py-3">
                           <span className={product.stock > 0 ? 'bg-green-500/10 text-green-500 px-2 py-0.5 border border-green-500/20' : 'bg-destructive/10 text-destructive px-2 py-0.5 border border-destructive/20'}>
-                            {product.stock > 0 ? 'DISPONIBLE' : 'AGOTADO'}
+                            {product.stock > 0 ? `DISPONIBLE (${product.stock})` : 'AGOTADO'}
                           </span>
                         </td>
                       </tr>
                     </tbody>
                   </table>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Descripción */}
+              <TabsContent value="description" className="mt-0">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-code text-primary uppercase mb-4 tracking-widest border-b border-border pb-2 inline-block">
+                      2.1 // ACERCA DEL PRODUCTO
+                    </h3>
+                    {product.description ? (
+                      <p className="text-muted-foreground leading-relaxed font-sans text-lg">
+                        {product.description}
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground/60 leading-relaxed font-sans text-lg italic">
+                        Producto fabricado con impresión 3D de alta calidad. Para más detalles técnicos, consulta la pestaña de especificaciones.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-code text-muted-foreground uppercase mb-3 tracking-widest">
+                        2.2 // ETIQUETAS
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {product.tags.map((tag, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 text-xs font-code uppercase tracking-wider border border-border bg-secondary/20 text-muted-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Info de fabricación */}
+                  <div className="mt-6 bg-secondary/10 border border-border p-4">
+                    <h4 className="text-sm font-code text-muted-foreground uppercase mb-3 tracking-widest">
+                      2.3 // FABRICACIÓN
+                    </h4>
+                    <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Box className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">Material:</span>
+                        <span className="font-medium">{product.material}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">Categoría:</span>
+                        <span className="font-medium">{product.category}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
             </div>

@@ -73,6 +73,18 @@ export async function GET(request: NextRequest) {
 
       console.log(`✅ Got ${result.data?.length || 0} products from Ventify`);
 
+      // 🔍 DEBUG: Log detallado del primer producto para verificar campos
+      if (result.data?.[0]) {
+        const p = result.data.find((x: any) => x.name?.toLowerCase().includes('creeper')) || result.data[0];
+        console.log(`🔍 Producto "${p.name}" fields:`, JSON.stringify({
+          description: p.description,
+          dimensions: p.dimensions,
+          weight: p.weight,
+          tags: p.tags,
+          attributes: p.attributes,
+        }));
+      }
+
       return NextResponse.json(result, {
         status: 200,
         headers: {
