@@ -15,13 +15,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { PRODUCT_CATEGORIES } from '@/lib/firebase/types';
 
 export default function TiendaPage() {
   const { products, loading, error, usingFallback } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
+
+  // Categorías calculadas dinámicamente
+  const dynamicCategories = useMemo(() => {
+    const categories = new Set(products.map(p => p.category).filter(Boolean));
+    return Array.from(categories).sort();
+  }, [products]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
@@ -145,7 +150,7 @@ export default function TiendaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las categorías</SelectItem>
-                  {PRODUCT_CATEGORIES.map((category) => (
+                  {dynamicCategories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
                     </SelectItem>
