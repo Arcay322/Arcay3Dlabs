@@ -64,6 +64,12 @@ export function ProductCard({ product }: ProductCardProps) {
               style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }}
             />
 
+            {/* 360° & AR Badge */}
+            <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md text-primary font-code font-bold px-2 py-0.5 text-[10px] uppercase shadow-sm z-10 border border-primary/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span>360° &amp; AR</span>
+            </div>
+
             {/* Price Tag - Technical Label Style */}
             <div className="absolute top-0 right-0 bg-primary text-primary-foreground font-code font-bold px-3 py-1 text-sm shadow-sm z-10">
               {formattedPrice}
