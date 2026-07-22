@@ -207,11 +207,13 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
       const url = product.modelUrl.trim();
       const cleanUrl = url.split('?')[0].toLowerCase();
       const isStl = cleanUrl.endsWith('.stl') || url.toLowerCase().includes('.stl');
+      // Usar proxy del servidor para omitir bloqueos CORS del navegador en Firebase Storage
+      const targetUrl = url.startsWith('http') ? `/api/model-proxy?url=${encodeURIComponent(url)}` : url;
 
       if (cleanUrl.endsWith('.glb') || cleanUrl.endsWith('.gltf') || url.toLowerCase().includes('.glb') || !isStl) {
         const loader = new GLTFLoader();
         loader.load(
-          url,
+          targetUrl,
           (gltf) => {
             const model = gltf.scene;
             const bbox = new THREE.Box3().setFromObject(model);
@@ -252,7 +254,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
       } else if (isStl) {
         const loader = new STLLoader();
         loader.load(
-          url,
+          targetUrl,
           (geometry) => {
             geometry.center();
             geometry.computeVertexNormals();
