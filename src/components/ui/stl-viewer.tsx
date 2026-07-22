@@ -9,9 +9,7 @@ import {
   estimateSTLCost,
   STLAnalysisResult,
 } from '@/lib/stl-utils';
-import { Badge } from '@/components/ui/badge';
-import { Box, Layers, Weight, DollarSign, RotateCcw, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Box, Layers, Weight, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface STLViewerProps {
   file: File | null;
@@ -32,6 +30,11 @@ export function STLViewer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<STLAnalysisResult | null>(null);
+  const [exceedsBedVolume, setExceedsBedVolume] = useState(false);
+
+  const BED_SIZE_X = 220; // mm
+  const BED_SIZE_Y = 220; // mm
+  const BED_SIZE_Z = 220; // mm
 
   useEffect(() => {
     if (!file || !containerRef.current) return;
@@ -39,6 +42,7 @@ export function STLViewer({
     let isMounted = true;
     setLoading(true);
     setError(null);
+    setExceedsBedVolume(false);
 
     const container = containerRef.current;
     const width = container.clientWidth || 300;
@@ -75,10 +79,20 @@ export function STLViewer({
     dirLight2.position.set(-10, -10, -10);
     scene.add(dirLight2);
 
-    // Rejilla de base técnica
-    const gridHelper = new THREE.GridHelper(200, 20, 0xf97316, 0x334155);
+    // Rejilla de base técnica (Cama de impresión 220x220 mm con cuadrículas de 10mm)
+    const gridHelper = new THREE.GridHelper(BED_SIZE_X, 22, 0xf97316, 0x334155);
     gridHelper.position.y = 0;
     scene.add(gridHelper);
+
+    // Caja de volumen máximo de impresión (220x220x220 mm)
+    const buildVolumeGeo = new THREE.BoxGeometry(BED_SIZE_X, BED_SIZE_Y, BED_SIZE_Z);
+    const wireframeGeo = new THREE.WireframeGeometry(buildVolumeGeo);
+    const buildVolumeBox = new THREE.LineSegments(
+      wireframeGeo,
+      new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.35 })
+    );
+    buildVolumeBox.position.y = BED_SIZE_Y / 2; // Elevar la caja desde la cama
+    scene.add(buildVolumeBox);
 
     // Leer el archivo STL en binario
     const reader = new FileReader();
@@ -91,16 +105,28 @@ export function STLViewer({
         const loader = new STLLoader();
         const geometry = loader.parse(buffer);
 
-        // Centrar y ajustar la escala del modelo 3D en el viewport
-        geometry.center();
-        geometry.computeVertexNormals();
-
-        // Obtener métricas geométricas
+        // Obtener métricas geométricas antes de mover origen
         const { dimensions, volumeCm3 } = calculateSTLGeometryMetrics(geometry);
 
-        // Material con estética de manufactura digital
+        // Verificar si la pieza excede el volumen máximo 220x220x220 mm
+        const exceeds =
+          dimensions.x > BED_SIZE_X || dimensions.y > BED_SIZE_Y || dimensions.z > BED_SIZE_Z;
+        setExceedsBedVolume(exceeds);
+
+        // Centrar en X y Z, asentando sobre la cama en Y=0
+        geometry.computeBoundingBox();
+        const bbox = geometry.boundingBox || new THREE.Box3();
+        const heightY = bbox.max.y - bbox.min.y;
+
+        geometry.center();
+        // Colocar la base de la pieza en la cama (Y=0)
+        geometry.translate(0, heightY / 2, 0);
+        geometry.computeVertexNormals();
+
+        // Material con estética de manufactura digital (resaltar si excede la cama)
+        const meshColor = exceeds ? 0xef4444 : 0xf97316; // Rojo si excede, Naranja si entra
         const meshMaterial = new THREE.MeshStandardMaterial({
-          color: 0xf97316,
+          color: meshColor,
           roughness: 0.3,
           metalness: 0.4,
           wireframe: false,
@@ -120,14 +146,15 @@ export function STLViewer({
 
         scene.add(mesh);
 
-        // Ajustar posición de cámara acorde al tamaño del objeto
-        const maxDim = Math.max(dimensions.x, dimensions.y, dimensions.z);
+        // Ajustar posición de cámara acorde al tamaño de la cama y objeto
+        const maxDim = Math.max(dimensions.x, dimensions.y, dimensions.z, BED_SIZE_X);
         const fov = camera.fov * (Math.PI / 180);
-        let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.8;
-        cameraZ = Math.max(cameraZ, 50);
+        let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.5;
+        cameraZ = Math.max(cameraZ, 120);
 
-        camera.position.set(cameraZ * 0.7, cameraZ * 0.7, cameraZ);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(cameraZ * 0.8, cameraZ * 0.8, cameraZ);
+        camera.lookAt(0, BED_SIZE_Y / 3, 0);
+        controls.target.set(0, BED_SIZE_Y / 3, 0);
         controls.update();
 
         // Calcular costo estimado
@@ -229,8 +256,22 @@ export function STLViewer({
         {/* HUD Indicator */}
         <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-md border border-border text-xs font-code flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span>MODELO 3D LOADED: {file.name.slice(0, 24)}</span>
+          <span>MODELO 3D: {file.name.slice(0, 24)}</span>
         </div>
+
+        {/* Indicador de Cama de Impresión */}
+        <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-2.5 py-1.5 rounded-md border border-border text-[11px] font-code flex items-center gap-1.5">
+          <span className="text-muted-foreground uppercase">Cama:</span>
+          <span className="text-primary font-bold">220×220×220 mm</span>
+        </div>
+
+        {/* Alerta si excede el tamaño máximo */}
+        {exceedsBedVolume && (
+          <div className="absolute bottom-3 left-3 bg-destructive/90 backdrop-blur-md px-3 py-1.5 rounded-md text-white text-xs font-code flex items-center gap-2 animate-pulse">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>Excede volumen máximo (220 mm). Requiere ensamblaje en partes.</span>
+          </div>
+        )}
 
         {loading && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
@@ -248,9 +289,11 @@ export function STLViewer({
           </div>
         )}
 
-        <div className="absolute bottom-3 right-3 text-[10px] font-code text-muted-foreground bg-black/60 px-2 py-1 rounded">
-          Arrastra para rotar | Scroll para zoom
-        </div>
+        {!exceedsBedVolume && (
+          <div className="absolute bottom-3 right-3 text-[10px] font-code text-muted-foreground bg-black/60 px-2 py-1 rounded">
+            Arrastra para rotar | Scroll para zoom
+          </div>
+        )}
       </div>
 
       {/* Panel de Métricas Calculadas en Tiempo Real */}
@@ -262,7 +305,7 @@ export function STLViewer({
               <Box className="h-3.5 w-3.5 text-primary" />
               <span>Medidas (mm)</span>
             </div>
-            <p className="font-bold font-code text-sm text-foreground">
+            <p className={`font-bold font-code text-sm ${exceedsBedVolume ? 'text-destructive' : 'text-foreground'}`}>
               {metrics.dimensions.x} × {metrics.dimensions.y} × {metrics.dimensions.z}
             </p>
           </div>
