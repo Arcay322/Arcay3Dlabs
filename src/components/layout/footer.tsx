@@ -103,10 +103,6 @@ export function Footer() {
                 Materiales
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary dark:bg-neon-cyan transition-all group-hover:w-full" />
               </Link>
-              <Link href="#galeria" className="text-sm text-muted-foreground hover:text-primary dark:hover:text-neon-cyan transition-colors relative inline-block w-fit group">
-                Galería
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary dark:bg-neon-cyan transition-all group-hover:w-full" />
-              </Link>
             </nav>
           </div>
 
