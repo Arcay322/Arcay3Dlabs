@@ -13,7 +13,8 @@ export interface Product {
     depth: number;
   };
   weight?: number;
-  images: string[]; // URLs from Firebase Storage
+  images: string[]; // URLs de imágenes
+  modelUrl?: string; // URL del archivo .GLB / .GLTF / .STL para visualización 3D & AR
   stock: number;
   featured: boolean;
   createdAt: Date;

@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Product } from '@/lib/firebase/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -182,23 +184,88 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     gridHelper.position.y = -7;
     scene.add(gridHelper);
 
-    // Crear la geometría del producto
-    const geometry = createProceduralProductGeometry(product.category, product.name);
-
     // Color del material (variante seleccionada o naranja por defecto)
     const activeColor = colorHex || '#f97316';
 
-    const meshMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(activeColor),
-      roughness: 0.35,
-      metalness: 0.2,
-      wireframe: wireframeMode,
-    });
+    const createMeshFallback = () => {
+      const geometry = createProceduralProductGeometry(product.category, product.name);
+      const meshMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(activeColor),
+        roughness: 0.35,
+        metalness: 0.2,
+        wireframe: wireframeMode,
+      });
 
-    const mesh = new THREE.Mesh(geometry, meshMaterial);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
+      const mesh = new THREE.Mesh(geometry, meshMaterial);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+    };
+
+    // Si el producto tiene una URL de modelo 3D (.glb o .stl) adjunta desde Ventify
+    if (product.modelUrl) {
+      const url = product.modelUrl.trim();
+      const ext = url.split('.').pop()?.toLowerCase();
+
+      if (ext === 'glb' || ext === 'gltf') {
+        const loader = new GLTFLoader();
+        loader.load(
+          url,
+          (gltf) => {
+            const model = gltf.scene;
+            const bbox = new THREE.Box3().setFromObject(model);
+            const center = bbox.getCenter(new THREE.Vector3());
+            model.position.sub(center);
+
+            // Respetar materiales y colores del AMS cargados en el GLB
+            model.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (wireframeMode && (child as THREE.Mesh).material) {
+                  ((child as THREE.Mesh).material as THREE.MeshStandardMaterial).wireframe = true;
+                }
+              }
+            });
+
+            scene.add(model);
+          },
+          undefined,
+          (err) => {
+            console.warn('No se pudo cargar el archivo GLB personalizado, usando vista previa:', err);
+            createMeshFallback();
+          }
+        );
+      } else if (ext === 'stl') {
+        const loader = new STLLoader();
+        loader.load(
+          url,
+          (geometry) => {
+            geometry.center();
+            geometry.computeVertexNormals();
+            const meshMaterial = new THREE.MeshStandardMaterial({
+              color: new THREE.Color(activeColor),
+              roughness: 0.35,
+              metalness: 0.2,
+              wireframe: wireframeMode,
+            });
+            const mesh = new THREE.Mesh(geometry, meshMaterial);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+          },
+          undefined,
+          (err) => {
+            console.warn('No se pudo cargar el archivo STL personalizado, usando vista previa:', err);
+            createMeshFallback();
+          }
+        );
+      } else {
+        createMeshFallback();
+      }
+    } else {
+      createMeshFallback();
+    }
 
     // Posición inicial de cámara
     camera.position.set(18, 14, 24);

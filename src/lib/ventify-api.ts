@@ -282,6 +282,18 @@ function extractWeightFromAttributes(attributes?: Array<{ name: string; value: s
 }
 
 /**
+ * Helper: extraer URL del modelo 3D (.GLB / .STL) desde atributos de Ventify
+ */
+function extractModelUrlFromAttributes(attributes?: Array<{ name: string; value: string }>): string | undefined {
+  if (!attributes || attributes.length === 0) return undefined;
+  const modelAttr = attributes.find(a => {
+    const k = (a.name || '').toLowerCase();
+    return k.includes('model') || k.includes('3d') || k.includes('glb') || k.includes('stl') || k.includes('archivo');
+  });
+  return modelAttr?.value ? modelAttr.value.trim() : undefined;
+}
+
+/**
  * Helper: extraer material desde attributes o inferir desde categoría
  */
 function getMaterialFromProduct(vp: VentifyProduct): string {
@@ -333,6 +345,9 @@ export function adaptVentifyProduct(vp: VentifyProduct): Product {
     // Campos de integración con Ventify
     sku: vp.sku,
     attributes: attrs,
+
+    // Extraer URL del modelo 3D (.GLB / .STL) desde attributes si se configuró en Ventify
+    modelUrl: (vp as any).modelUrl || (vp as any).stlUrl || extractModelUrlFromAttributes(attrs),
 
     // Extraer de attributes o usar defaults, priorizando dimensiones nativas
     dimensions: vp.dimensions
