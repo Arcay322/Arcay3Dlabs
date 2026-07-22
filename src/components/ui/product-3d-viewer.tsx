@@ -13,7 +13,6 @@ import {
   Layers,
   Smartphone,
   Sparkles,
-  Maximize2,
   CheckCircle,
 } from 'lucide-react';
 import {
@@ -30,35 +29,36 @@ interface Product3DViewerProps {
 }
 
 /**
- * Genera una geometría 3D detallada y estilizada según la categoría del producto
+ * Genera una geometría 3D suave, realista y reconocible según el tipo de producto
  */
 function createProceduralProductGeometry(category: string, name: string): THREE.BufferGeometry {
   const cat = category.toLowerCase();
   const n = name.toLowerCase();
 
-  if (cat.includes('decoración') || n.includes('jarrón') || n.includes('lámpara')) {
-    // Jarrón Geométrico Espiralado (Lathe Geometry con curvas)
+  let geo: THREE.BufferGeometry;
+
+  if (cat.includes('decoración') || n.includes('jarrón') || n.includes('maceta') || n.includes('lámpara')) {
+    // Jarrón Cerámico Espiralado Suave (64 segmentos)
     const points: THREE.Vector2[] = [];
-    for (let i = 0; i < 20; i++) {
-      const y = (i / 20) * 16 - 8;
-      const radius = Math.sin(i * 0.3) * 2.5 + 4.5 + (i > 15 ? (i - 15) * 0.3 : 0);
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const y = t * 14 - 7;
+      const radius = 3.5 + Math.sin(t * Math.PI * 2.5) * 1.8 + (t > 0.8 ? (t - 0.8) * 3 : 0);
       points.push(new THREE.Vector2(radius, y));
     }
-    return new THREE.LatheGeometry(points, 12);
-  }
-
-  if (cat.includes('mecánico') || n.includes('engranaje') || n.includes('arduino')) {
-    // Engranaje o Pieza Técnica
+    geo = new THREE.LatheGeometry(points, 64);
+  } else if (cat.includes('mecánico') || n.includes('engranaje') || n.includes('arduino') || n.includes('carcasa')) {
+    // Engranaje Mecánico de Precisión
     const shape = new THREE.Shape();
-    const teeth = 12;
-    const outerRadius = 7;
-    const innerRadius = 5.5;
+    const teeth = 16;
+    const outerRadius = 7.5;
+    const innerRadius = 5.8;
 
     for (let i = 0; i < teeth; i++) {
       const angle1 = (i / teeth) * Math.PI * 2;
-      const angle2 = ((i + 0.25) / teeth) * Math.PI * 2;
+      const angle2 = ((i + 0.3) / teeth) * Math.PI * 2;
       const angle3 = ((i + 0.5) / teeth) * Math.PI * 2;
-      const angle4 = ((i + 0.75) / teeth) * Math.PI * 2;
+      const angle4 = ((i + 0.8) / teeth) * Math.PI * 2;
 
       if (i === 0) shape.moveTo(Math.cos(angle1) * innerRadius, Math.sin(angle1) * innerRadius);
       shape.lineTo(Math.cos(angle2) * innerRadius, Math.sin(angle2) * innerRadius);
@@ -68,23 +68,48 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
       shape.lineTo(Math.cos(angle4) * innerRadius, Math.sin(angle4) * innerRadius);
     }
 
-    const extrudeSettings = { depth: 3, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.4, bevelThickness: 0.4 };
-    return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    // Agujero eje central
+    const holePath = new THREE.Path();
+    holePath.absarc(0, 0, 2.2, 0, Math.PI * 2, true);
+    shape.holes.push(holePath);
+
+    const extrudeSettings = { depth: 2.5, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.3, bevelThickness: 0.3 };
+    geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  } else if (cat.includes('organizadores') || cat.includes('utilidades') || n.includes('soporte') || n.includes('celular') || n.includes('llaves')) {
+    // Soporte Ergonómico para Celular / Dock de Escritorio
+    const shape = new THREE.Shape();
+    shape.moveTo(-5, -4);
+    shape.lineTo(5, -4);
+    shape.lineTo(6, -2);
+    shape.lineTo(2, 6);
+    shape.lineTo(-2, 6);
+    shape.lineTo(-6, -2);
+    shape.closePath();
+
+    const extrudeSettings = { depth: 7, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.4, bevelThickness: 0.4 };
+    geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  } else if (cat.includes('arte') || cat.includes('juguetes') || n.includes('ajedrez') || n.includes('figura') || n.includes('busto')) {
+    // Pieza de Escultura / Torre de Ajedrez Elegante
+    const points: THREE.Vector2[] = [];
+    points.push(new THREE.Vector2(4.5, -7));
+    points.push(new THREE.Vector2(4.5, -5.5));
+    points.push(new THREE.Vector2(3.5, -4.5));
+    points.push(new THREE.Vector2(2.5, 0));
+    points.push(new THREE.Vector2(3.2, 3));
+    points.push(new THREE.Vector2(3.8, 4.5));
+    points.push(new THREE.Vector2(3.8, 6));
+    points.push(new THREE.Vector2(2.0, 6));
+    points.push(new THREE.Vector2(2.0, 7));
+    points.push(new THREE.Vector2(0, 7));
+    geo = new THREE.LatheGeometry(points, 48);
+  } else {
+    // Dodecaedro Geodésico de Diseño
+    geo = new THREE.DodecahedronGeometry(6, 1);
   }
 
-  if (cat.includes('organizadores') || cat.includes('utilidades') || n.includes('soporte') || n.includes('celular')) {
-    // Soporte Ergonomico / Organizador Modular
-    const box = new THREE.BoxGeometry(10, 8, 10, 4, 4, 4);
-    return box;
-  }
-
-  if (cat.includes('arte') || cat.includes('juguetes') || n.includes('dragón') || n.includes('escultura') || n.includes('ajedrez')) {
-    // Geometría Escultórica Poliédrica (Icosaedro complejo)
-    return new THREE.IcosahedronGeometry(7, 2);
-  }
-
-  // Fallback: Toroide Elegante
-  return new THREE.TorusKnotGeometry(5, 1.6, 64, 16);
+  geo.center();
+  geo.computeVertexNormals();
+  return geo;
 }
 
 export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
@@ -97,7 +122,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Detectar si el usuario está en móvil
     const checkMobile = () => {
       setIsMobile(/Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent));
     };
@@ -133,34 +157,33 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     controls.dampingFactor = 0.05;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 2.5;
-    controls.maxPolarAngle = Math.PI / 2 + 0.1; // No bajar demasiado bajo la cama
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
     controlsRef.current = controls;
 
     // Luces de Estudio de Fotografía 3D
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff0dd, 1.4); // Luz principal cálida
+    const keyLight = new THREE.DirectionalLight(0xfff0dd, 1.4);
     keyLight.position.set(15, 25, 20);
     keyLight.castShadow = true;
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x00f3ff, 1.0); // Luz de borde cian neón
+    const rimLight = new THREE.DirectionalLight(0x00f3ff, 1.0);
     rimLight.position.set(-20, 10, -20);
     scene.add(rimLight);
 
-    const fillLight = new THREE.PointLight(0xf97316, 0.8, 50); // Luz de relleno naranja
+    const fillLight = new THREE.PointLight(0xf97316, 0.8, 50);
     fillLight.position.set(0, -10, 15);
     scene.add(fillLight);
 
     // Cama de impresión 3D (220x220 mm simulación)
     const gridHelper = new THREE.GridHelper(30, 15, 0xf97316, 0x334155);
-    gridHelper.position.y = -6;
+    gridHelper.position.y = -7;
     scene.add(gridHelper);
 
     // Crear la geometría del producto
     const geometry = createProceduralProductGeometry(product.category, product.name);
-    geometry.center();
 
     // Color del material (variante seleccionada o naranja por defecto)
     const activeColor = colorHex || '#f97316';
@@ -168,7 +191,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     const meshMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(activeColor),
       roughness: 0.35,
-      metalness: 0.25,
+      metalness: 0.2,
       wireframe: wireframeMode,
     });
 
@@ -176,18 +199,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
-
-    // Si no está en wireframe puro, agregar capas secundarias para simular FDM
-    if (!wireframeMode) {
-      const wireGeo = new THREE.WireframeGeometry(geometry);
-      const wireMat = new THREE.LineBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.08,
-      });
-      const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
-      mesh.add(wireMesh);
-    }
 
     // Posición inicial de cámara
     camera.position.set(18, 14, 24);
@@ -332,7 +343,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
                 </div>
                 <Button
                   onClick={() => {
-                    // Simulación de visor WebXR / AR QuickLook
                     alert('Lanzando cámara AR... Apunta a una superficie plana.');
                   }}
                   className="w-full gradient-primary font-code uppercase tracking-wider text-sm h-12"
@@ -345,7 +355,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
               <div className="space-y-4 text-center">
                 <div className="p-6 border-2 border-dashed border-primary/40 rounded-lg bg-secondary/30 flex flex-col items-center justify-center space-y-3">
                   <div className="w-32 h-32 bg-white p-2 rounded-md shadow-inner flex items-center justify-center border border-border">
-                    {/* Código QR de demostración estilizado */}
                     <div className="w-full h-full border-2 border-dashed border-zinc-800 flex items-center justify-center text-[10px] font-code text-zinc-800 text-center font-bold">
                       [ ESCANEAR CON LA CÁMARA DE TU CELULAR ]
                     </div>
