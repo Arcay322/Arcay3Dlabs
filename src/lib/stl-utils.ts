@@ -15,9 +15,8 @@ export interface STLAnalysisResult {
 
 export const MATERIAL_DENSITIES: Record<string, number> = {
   PLA: 1.24,
+  'PLA+': 1.24,
   PETG: 1.27,
-  ABS: 1.04,
-  Resina: 1.15,
 };
 
 /**

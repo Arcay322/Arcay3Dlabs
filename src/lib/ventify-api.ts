@@ -239,13 +239,13 @@ function buildImageArray(imageUrl?: string, galleryImages?: string[]): string[] 
  */
 function getMaterialFromCategory(category: string): string {
   const materialMap: Record<string, string> = {
-    'Figuras': 'Resina',
+    'Figuras': 'PLA+',
     'Decoración': 'PLA',
-    'Arte': 'Resina',
-    'Mecánico': 'ABS',
-    'Organizadores': 'PETG',
-    'Tecnología': 'ABS',
-    'Tecnologia': 'ABS', // Sin acento también
+    'Arte': 'PLA+',
+    'Mecánico': 'PLA+',
+    'Organizadores': 'PLA',
+    'Tecnología': 'PLA+',
+    'Tecnologia': 'PLA+',
     'Juguetes': 'PLA',
   };
   return materialMap[category] || 'PLA';

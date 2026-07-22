@@ -159,12 +159,12 @@ export function QuoteForm() {
             {/* Tarjetas de Materiales */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="p-3 border border-border rounded-sm bg-background/60 backdrop-blur-sm">
-                <h4 className="font-code text-xs text-primary font-bold uppercase mb-1">Impresión FDM (PLA / PETG)</h4>
-                <p className="text-xs text-muted-foreground">Piezas funcionales, prototipos de ingeniería, carcazas y decoración.</p>
+                <h4 className="font-code text-xs text-primary font-bold uppercase mb-1">Impresión FDM PLA</h4>
+                <p className="text-xs text-muted-foreground">Especialistas en PLA de alta calidad para prototipos, maquetas y figuras.</p>
               </div>
               <div className="p-3 border border-border rounded-sm bg-background/60 backdrop-blur-sm">
-                <h4 className="font-code text-xs text-primary font-bold uppercase mb-1">Impresión Resina UV</h4>
-                <p className="text-xs text-muted-foreground">Figuras de alta resolución, joyería, miniaturas y acabados lisos.</p>
+                <h4 className="font-code text-xs text-primary font-bold uppercase mb-1">PLA+ Técnico</h4>
+                <p className="text-xs text-muted-foreground">Mayor tenacidad y resistencia mecánica para piezas de uso diario.</p>
               </div>
             </div>
 

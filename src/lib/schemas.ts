@@ -5,9 +5,7 @@ export const quoteFormSchema = z.object({
   email: z.string().email({ message: "Por favor, introduce un email válido." }),
   phone: z.string().min(10, { message: "Por favor, introduce un teléfono válido." }).optional(),
   description: z.string().min(10, { message: "La descripción debe tener al menos 10 caracteres." }).max(500, { message: "La descripción no puede exceder los 500 caracteres." }),
-  material: z.enum(["PLA", "ABS", "PETG", "Resina", "TPU", "Otro"], {
-    required_error: "Por favor, selecciona un material.",
-  }),
+  material: z.string().min(1, { message: "Por favor, selecciona un material." }),
   quantity: z.number().min(1, { message: "La cantidad debe ser al menos 1." }).max(1000, { message: "La cantidad máxima es 1000." }),
   file: z
     .any()

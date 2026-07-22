@@ -52,7 +52,7 @@ export interface QuoteRequest {
   customerEmail: string;
   customerPhone?: string;
   description: string;
-  material: 'PLA' | 'ABS' | 'PETG' | 'Resina' | 'TPU' | 'Otro';
+  material: string;
   quantity: number;
   fileUrl?: string; // URL del archivo STL/OBJ en Storage
   fileName?: string;
@@ -106,9 +106,9 @@ export interface GalleryImage {
   createdAt: Date;
 }
 
-export type MaterialType = 'PLA' | 'ABS' | 'PETG' | 'Resina' | 'TPU' | 'Otro';
+export type MaterialType = 'PLA' | 'PLA+' | 'Otro';
 
-export const MATERIALS: MaterialType[] = ['PLA'];
+export const MATERIALS: MaterialType[] = ['PLA', 'PLA+'];
 
 export const PRODUCT_CATEGORIES = [
   'Decoración',
