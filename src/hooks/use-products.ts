@@ -208,11 +208,10 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
 
       console.log('[useProducts] 🔄 Obteniendo productos de Ventify API...');
 
-      // 2. Llamar a la API real de Ventify
+      // 2. Llamar a la API real de Ventify (sin limitar antes de aplicar los filtros)
       const ventifyProducts = await ventifyAPI.getProducts({
         category: filters?.category,
         active: true,
-        limit: filters?.limitCount,
       });
 
       console.log(`[useProducts] ✅ Recibidos ${ventifyProducts.length} productos de Ventify`);
@@ -220,10 +219,23 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
       // 3. Adaptar los datos al formato interno
       const adapted = ventifyProducts.map(adaptVentifyProduct);
 
-      // 4. Aplicar filtro de featured si es necesario
+      // 4. Aplicar filtro de featured con fallback inteligente
       let filtered = adapted;
       if (filters?.featured !== undefined) {
-        filtered = adapted.filter(p => p.featured === filters.featured);
+        const featuredOnly = filtered.filter(p => p.featured === filters.featured);
+        // Si se pidieron destacados pero ningún producto del backend tiene featured=true,
+        // mostramos los primeros productos disponibles para que la sección no quede vacía.
+        if (filters.featured && featuredOnly.length === 0 && filtered.length > 0) {
+          console.warn('[useProducts] ⚠️ Ningún producto del backend marcado como destacado. Usando los primeros productos activos.');
+          filtered = filtered.slice(0, filters.limitCount || 4);
+        } else {
+          filtered = featuredOnly;
+        }
+      }
+
+      // 5. Aplicar límite de cantidad final
+      if (filters?.limitCount && filtered.length > filters.limitCount) {
+        filtered = filtered.slice(0, filters.limitCount);
       }
 
       console.log(`[useProducts] 📦 Productos adaptados y filtrados: ${filtered.length}`);
@@ -246,9 +258,14 @@ export function useProducts(filters?: UseProductsOptions): UseProductsReturn {
       fallback = fallback.filter(p => p.category === filters.category);
     }
     if (filters?.featured !== undefined) {
-      fallback = fallback.filter(p => p.featured === filters.featured);
+      const featuredOnly = fallback.filter(p => p.featured === filters.featured);
+      if (filters.featured && featuredOnly.length === 0 && fallback.length > 0) {
+        fallback = fallback.slice(0, filters.limitCount || 4);
+      } else {
+        fallback = featuredOnly;
+      }
     }
-    if (filters?.limitCount) {
+    if (filters?.limitCount && fallback.length > filters.limitCount) {
       fallback = fallback.slice(0, filters.limitCount);
     }
 
