@@ -362,7 +362,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
 
       {/* Modal / Diálogo de Realidad Aumentada (AR) para PC */}
       <Dialog open={showARDialog} onOpenChange={setShowARDialog}>
-        <DialogContent className="max-w-md bg-card border-layered z-[100]">
+        <DialogContent className="max-w-md bg-zinc-900 border-2 border-primary/50 text-white z-[100] shadow-2xl">
           <DialogHeader>
             <DialogTitle className="font-headline text-2xl flex items-center gap-2">
               <Smartphone className="h-6 w-6 text-primary" />
