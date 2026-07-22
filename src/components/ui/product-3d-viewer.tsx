@@ -205,9 +205,10 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     // Si el producto tiene una URL de modelo 3D (.glb o .stl) adjunta desde Ventify
     if (product.modelUrl) {
       const url = product.modelUrl.trim();
-      const ext = url.split('.').pop()?.toLowerCase();
+      const cleanUrl = url.split('?')[0].toLowerCase();
+      const isStl = cleanUrl.endsWith('.stl') || url.toLowerCase().includes('.stl');
 
-      if (ext === 'glb' || ext === 'gltf') {
+      if (cleanUrl.endsWith('.glb') || cleanUrl.endsWith('.gltf') || url.toLowerCase().includes('.glb') || !isStl) {
         const loader = new GLTFLoader();
         loader.load(
           url,
@@ -215,7 +216,19 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
             const model = gltf.scene;
             const bbox = new THREE.Box3().setFromObject(model);
             const center = bbox.getCenter(new THREE.Vector3());
-            model.position.sub(center);
+            const size = bbox.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+
+            // Escalar modelo si es necesario para encajar bien en la escena
+            if (maxDim > 0 && (maxDim < 2 || maxDim > 25)) {
+              const scaleFactor = 12 / maxDim;
+              model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            }
+
+            // Re-calcular centro después de escalar
+            const scaledBbox = new THREE.Box3().setFromObject(model);
+            const scaledCenter = scaledBbox.getCenter(new THREE.Vector3());
+            model.position.sub(scaledCenter);
 
             // Respetar materiales y colores del AMS cargados en el GLB
             model.traverse((child) => {
@@ -236,7 +249,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
             createMeshFallback();
           }
         );
-      } else if (ext === 'stl') {
+      } else if (isStl) {
         const loader = new STLLoader();
         loader.load(
           url,
