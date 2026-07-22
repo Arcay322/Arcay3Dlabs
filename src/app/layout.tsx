@@ -1,54 +1,89 @@
-'use client';
-
+import type { Metadata } from 'next';
+import { Roboto, Poppins, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/theme-provider"
-import { CartProvider } from '@/contexts/cart-context';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { queryClient } from '@/lib/query-client';
+import { Providers } from '@/components/providers';
+import { ClientShell } from '@/components/layout/client-shell';
+import { siteConfig } from '@/config/site';
 
-import { usePathname } from 'next/navigation';
+const fontRoboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
+});
+
+const fontPoppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
+
+const fontJetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: `${siteConfig.name} | Taller de Manufactura Digital 3D`,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: [
+    'impresión 3D',
+    'manufactura digital',
+    'PLA',
+    'FDM',
+    'prototipado',
+    'diseño 3D',
+    'Perú',
+    'Arcay3DLabs',
+  ],
+  authors: [{ name: 'Arcay3DLabs' }],
+  creator: 'Arcay3DLabs',
+  openGraph: {
+    type: 'website',
+    locale: 'es_PE',
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: `${siteConfig.url}/images/a3dl_logo.webp`,
+        width: 800,
+        height: 800,
+        alt: 'Arcay3DLabs Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [`${siteConfig.url}/images/a3dl_logo.webp`],
+  },
+  icons: {
+    icon: '/images/a3dl_logo.webp',
+  },
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isSocialsPage = pathname === '/socials';
-
   return (
-    <html lang="es">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link rel="icon" href="/images/a3dl_logo.webp" />
-      </head>
-      <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryClientProvider client={queryClient}>
-            <CartProvider>
-              <div className="flex min-h-screen flex-col bg-background">
-                {!isSocialsPage && <Header />}
-                <main className="flex-1">
-                  {children}
-                </main>
-                {!isSocialsPage && <Footer />}
-              </div>
-              <Toaster />
-            </CartProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </ThemeProvider>
+    <html lang="es" suppressHydrationWarning>
+      <body
+        className={`${fontRoboto.variable} ${fontPoppins.variable} ${fontJetbrains.variable} font-body antialiased`}
+      >
+        <Providers>
+          <ClientShell>{children}</ClientShell>
+        </Providers>
       </body>
     </html>
   );

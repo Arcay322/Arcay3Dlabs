@@ -18,8 +18,8 @@ export default {
     extend: {
       fontFamily: {
         body: ['var(--font-roboto)', 'sans-serif'],
-        headline: ['var(--font-space)', 'sans-serif'],
-        code: ['"JetBrains Mono"', 'monospace'],
+        headline: ['var(--font-poppins)', 'sans-serif'],
+        code: ['var(--font-jetbrains)', 'monospace'],
       },
       colors: {
         'workshop-slate': '#1a1d24',

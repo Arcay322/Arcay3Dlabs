@@ -10,9 +10,7 @@ import confetti from 'canvas-confetti';
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const orderId = searchParams.get('orderId');
-  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     // Trigger confetti animation
@@ -32,7 +30,7 @@ function ConfirmationContent() {
       }
 
       const particleCount = 50 * (timeLeft / duration);
-      
+
       confetti({
         ...defaults,
         particleCount,
@@ -47,20 +45,6 @@ function ConfirmationContent() {
 
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    // Redirect countdown
-    if (countdown === 0) {
-      router.push('/');
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setCountdown(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [countdown, router]);
 
   if (!orderId) {
     return (
@@ -182,7 +166,7 @@ function ConfirmationContent() {
         </div>
 
         {/* Info Box */}
-        <Card className="bg-primary/5 border-primary/20 animate-fadeIn">
+        <Card className="bg-primary/5 border-primary/20 animate-fadeIn mb-8">
           <CardContent className="p-6">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -208,11 +192,6 @@ function ConfirmationContent() {
             </ul>
           </CardContent>
         </Card>
-
-        {/* Auto Redirect Notice */}
-        <div className="text-center mt-8 text-sm text-muted-foreground animate-pulse">
-          Redirigiendo al inicio en {countdown} segundos...
-        </div>
       </div>
     </div>
   );

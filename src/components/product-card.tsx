@@ -1,9 +1,10 @@
+'use client';
+
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/utils";
@@ -28,16 +29,17 @@ export function ProductCard({ product }: ProductCardProps) {
       description: `${product.name} se agregó al carrito`,
     });
   };
+
   const mainImage = product.images?.[0] || '/placeholder-product.jpg';
   const formattedPrice = formatPrice(product.price);
 
   return (
-    <Card className="overflow-hidden bg-background border border-border transition-all duration-300 hover:shadow-lg group relative border-layered">
-      <Link href={`/productos/${product.id}`} className="block h-full flex flex-col">
+    <Card className="overflow-hidden bg-background border border-border transition-all duration-300 hover:shadow-lg group relative border-layered flex flex-col h-full">
+      <Link href={`/productos/${product.id}`} className="block flex-1 flex flex-col focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
         {/* Technical Header */}
         <div className="border-b border-border bg-secondary/50 px-3 py-1 flex justify-between items-center text-[10px] font-code text-muted-foreground uppercase tracking-wider">
           <span>ID: {product.id.slice(0, 6)}</span>
-          <span>ESTADO: EN STOCK</span>
+          <span>ESTADO: {product.stock > 0 ? 'EN STOCK' : 'AGOTADO'}</span>
         </div>
 
         <CardHeader className="p-0 relative border-b border-border">
@@ -57,8 +59,10 @@ export function ProductCard({ product }: ProductCardProps) {
               />
             )}
             {/* Overlay Grid */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
-              style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.05]"
+              style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }}
+            />
 
             {/* Price Tag - Technical Label Style */}
             <div className="absolute top-0 right-0 bg-primary text-primary-foreground font-code font-bold px-3 py-1 text-sm shadow-sm z-10">
@@ -95,19 +99,19 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           </div>
         </CardContent>
-
-        <CardFooter className="p-4 pt-0 mt-auto">
-          <Button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full font-code text-xs uppercase tracking-wide bg-foreground text-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-sm"
-            size="sm"
-          >
-            <ShoppingCart className="h-3 w-3 mr-2" />
-            {product.stock === 0 ? '> NO DISPONIBLE' : '> AÑADIR AL CARRITO'}
-          </Button>
-        </CardFooter>
       </Link>
+
+      <CardFooter className="p-4 pt-0 mt-auto">
+        <Button
+          onClick={handleAddToCart}
+          disabled={product.stock === 0}
+          className="w-full font-code text-xs uppercase tracking-wide bg-foreground text-background hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-sm"
+          size="sm"
+        >
+          <ShoppingCart className="h-3 w-3 mr-2" />
+          {product.stock === 0 ? '> NO DISPONIBLE' : '> AÑADIR AL CARRITO'}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

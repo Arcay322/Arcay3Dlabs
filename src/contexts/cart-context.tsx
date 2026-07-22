@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Product, ProductVariant } from '@/lib/firebase/types';
 
 export interface CartItem extends Product {
@@ -50,16 +50,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (product: Product, quantity: number = 1, variant?: ProductVariant) => {
     setItems((prevItems) => {
-      // Clave única: productId + variantId
       const itemKey = variant ? `${product.id}_${variant.id}` : product.id;
       const existingItem = prevItems.find((item) => {
         const existingKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
         return existingKey === itemKey;
       });
 
-      // Stock máximo: usar stock de la variante si existe, o del producto
       const maxStock = variant ? variant.stock : product.stock;
-      // Precio: aplicar ajuste de variante si existe
       const itemPrice = variant ? product.price + (variant.priceAdjustment || 0) : product.price;
 
       if (existingItem) {
@@ -70,23 +67,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             : item;
         });
       } else {
-        return [...prevItems, {
-          ...product,
-          price: itemPrice,
-          quantity: Math.min(quantity, maxStock),
-          selectedVariant: variant,
-        }];
+        return [
+          ...prevItems,
+          {
+            ...product,
+            price: itemPrice,
+            quantity: Math.min(quantity, maxStock),
+            selectedVariant: variant,
+          },
+        ];
       }
     });
   };
 
   const removeItem = (productId: string, variantId?: string) => {
-    setItems((prevItems) => prevItems.filter((item) => {
-      if (variantId) {
-        return !(item.id === productId && item.selectedVariant?.id === variantId);
-      }
-      return item.id !== productId || item.selectedVariant !== undefined;
-    }));
+    setItems((prevItems) =>
+      prevItems.filter((item) => {
+        if (variantId) {
+          return !(item.id === productId && item.selectedVariant?.id === variantId);
+        }
+        return item.id !== productId;
+      })
+    );
   };
 
   const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
@@ -112,24 +114,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
+  const totalPrice = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
 
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        totalPrice,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  const value = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      totalItems,
+      totalPrice,
+    }),
+    [items, totalItems, totalPrice]
   );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {

@@ -241,33 +241,9 @@ export default function CheckoutPage() {
       const orderData = {
         id: orderId,
         requestNumber: requestNumber || null,
-        customerName: formData.fullName,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
-        items: items.map(item => ({
-          productId: item.id,
-          productName: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          total: item.price * item.quantity,
-          ...(item.selectedVariant ? {
-            variantId: item.selectedVariant.id,
-            variantName: item.selectedVariant.name,
-          } : {}),
-        })),
-        shippingAddress: {
-          street: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country,
-        },
-        subtotal,
-        shipping,
-        tax: 0,
+        itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
         total,
         paymentMethod: formData.paymentMethod,
-        notes: formData.notes,
         createdAt: new Date().toISOString(),
       };
 
