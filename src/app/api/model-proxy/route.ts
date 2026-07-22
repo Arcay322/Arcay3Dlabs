@@ -6,35 +6,42 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const modelUrl = searchParams.get('url');
+    const rawUrlIndex = request.url.indexOf('?url=');
+    let targetUrl = '';
 
-    if (!modelUrl) {
+    if (rawUrlIndex !== -1) {
+      targetUrl = request.url.substring(rawUrlIndex + 5);
+      // Decodificar si la URL viene completamente encoded
+      if (targetUrl.startsWith('http%3A') || targetUrl.startsWith('https%3A')) {
+        targetUrl = decodeURIComponent(targetUrl);
+      }
+    } else {
+      const { searchParams } = new URL(request.url);
+      targetUrl = searchParams.get('url') || '';
+    }
+
+    if (!targetUrl) {
       return NextResponse.json({ error: 'URL del modelo es requerida' }, { status: 400 });
     }
 
-    // Descodificar URL si es necesario
-    const decodedUrl = decodeURIComponent(modelUrl);
-
-    // Fetch al recurso 3D desde el servidor (los servidores no están sujetos a CORS del navegador)
-    const response = await fetch(decodedUrl, {
+    // Fetch directo desde el servidor a la URL completa (incluyendo alt=media&token=...)
+    const response = await fetch(targetUrl, {
       method: 'GET',
-      headers: {
-        'User-Agent': 'Arcay3DLabs-ModelProxy/1.0',
-      },
+      cache: 'force-cache',
     });
 
     if (!response.ok) {
+      console.error(`[ModelProxy] Error desde Firebase/Fuente (${response.status}):`, targetUrl);
       return NextResponse.json(
-        { error: `Error al obtener el modelo 3D desde la fuente: ${response.statusText}` },
+        { error: `Error al obtener el modelo 3D desde la fuente: HTTP ${response.status}` },
         { status: response.status }
       );
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const contentType = response.headers.get('content-type') || 'model/gltf-binary';
 
-    // Retornar el archivo binario con headers de CORS abiertos para el cliente
+    // Retornar archivo binario con headers de CORS de amplio alcance
     return new NextResponse(arrayBuffer, {
       status: 200,
       headers: {
