@@ -13,6 +13,7 @@ import { useCart } from '@/contexts/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from '@/components/product-card';
+import { Product3DViewer } from '@/components/ui/product-3d-viewer';
 import {
   ArrowLeft,
   ShoppingCart,
@@ -26,6 +27,7 @@ import {
   Weight,
   Box,
   Check,
+  Eye,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import type { Product, ProductVariant } from '@/lib/firebase/types';
@@ -41,6 +43,7 @@ export default function ProductoPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   useEffect(() => {
     if (!loading && products.length > 0) {
@@ -158,59 +161,110 @@ export default function ProductoPage() {
 
         {/* Product Details */}
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
-          {/* Images */}
+          {/* Images & 3D Viewer */}
           <div className="space-y-4 animate-slideInLeft">
-            {/* Main Image */}
-            <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden">
-              <Image
-                src={displayImages[selectedImage] || '/placeholder-product.jpg'}
-                alt={product.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                priority
-              />
-              {/* Grid Overlay */}
-              <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
-                style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+            {/* Control Bar: Mode Selector */}
+            <div className="flex items-center justify-between bg-secondary/50 border border-border p-1 rounded-md">
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant={viewMode === '2d' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('2d')}
+                  className={viewMode === '2d' ? 'gradient-primary font-code text-xs uppercase' : 'font-code text-xs uppercase'}
+                >
+                  <Eye className="mr-1.5 h-3.5 w-3.5" />
+                  Fotos (2D)
+                </Button>
+                <Button
+                  type="button"
+                  variant={viewMode === '3d' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('3d')}
+                  className={viewMode === '3d' ? 'gradient-primary font-code text-xs uppercase' : 'font-code text-xs uppercase text-primary'}
+                >
+                  <Box className="mr-1.5 h-3.5 w-3.5" />
+                  Visor 3D 360° &amp; AR
+                </Button>
+              </div>
 
-              {product.featured && (
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 font-code text-xs font-bold uppercase shadow-sm">
-                  ★ DESTACADO
-                </div>
-              )}
-              {product.stock === 0 && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                  <div className="border-2 border-destructive text-destructive px-6 py-3 font-code text-2xl font-bold uppercase tracking-widest -rotate-12 bg-background/90">
-                    AGOTADO
-                  </div>
-                </div>
-              )}
+              <span className="text-[10px] font-code text-primary uppercase font-bold px-2 py-0.5 bg-primary/10 border border-primary/20 rounded hidden sm:inline-block">
+                ★ 360° &amp; AR Disponibles
+              </span>
             </div>
 
-            {/* Thumbnails */}
-            {displayImages.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {displayImages.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`aspect-square border-2 transition-all hover:border-primary ${selectedImage === index
-                      ? 'border-primary ring-1 ring-primary/20 scale-95'
-                      : 'border-border opacity-70 hover:opacity-100'
-                      }`}
-                  >
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={image}
-                        alt={`${product.name} - ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+            {/* Viewport: 2D Gallery vs 3D Interactive Viewer */}
+            {viewMode === '3d' ? (
+              <Product3DViewer product={product} colorHex={selectedVariant?.colorHex} />
+            ) : (
+              <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden rounded-lg">
+                <Image
+                  src={displayImages[selectedImage] || '/placeholder-product.jpg'}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  priority
+                />
+                {/* Grid Overlay */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.05]"
+                  style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+
+                {product.featured && (
+                  <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 font-code text-xs font-bold uppercase shadow-sm">
+                    ★ DESTACADO
+                  </div>
+                )}
+                {product.stock === 0 && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                    <div className="border-2 border-destructive text-destructive px-6 py-3 font-code text-2xl font-bold uppercase tracking-widest -rotate-12 bg-background/90">
+                      AGOTADO
                     </div>
-                  </button>
-                ))}
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Thumbnails */}
+            <div className="grid grid-cols-5 gap-2">
+              {/* Botón directo a Modelo 3D */}
+              <button
+                onClick={() => setViewMode('3d')}
+                className={`aspect-square border-2 transition-all flex flex-col items-center justify-center p-1 rounded-md ${
+                  viewMode === '3d'
+                    ? 'border-primary bg-primary/10 ring-1 ring-primary/20 scale-95'
+                    : 'border-primary/40 bg-secondary/40 hover:border-primary opacity-80 hover:opacity-100'
+                }`}
+                title="Probar en 3D 360°"
+              >
+                <Box className="h-5 w-5 text-primary animate-pulse" />
+                <span className="text-[9px] font-code text-primary font-bold uppercase mt-1">VISTA 3D</span>
+              </button>
+
+              {/* Miniaturas de imágenes 2D */}
+              {displayImages.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSelectedImage(index);
+                    setViewMode('2d');
+                  }}
+                  className={`aspect-square border-2 transition-all hover:border-primary rounded-md overflow-hidden ${
+                    viewMode === '2d' && selectedImage === index
+                      ? 'border-primary ring-1 ring-primary/20 scale-95'
+                      : 'border-border opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={image}
+                      alt={`${product.name} - ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Product Info */}
