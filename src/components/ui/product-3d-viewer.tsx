@@ -425,28 +425,35 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
                 </div>
                 <Button
                   onClick={() => {
-                    alert('Lanzando cámara AR... Apunta a una superficie plana.');
+                    const rawUrl = product.modelUrl || window.location.href;
+                    if (/Android/i.test(navigator.userAgent)) {
+                      window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(rawUrl)}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
+                    } else {
+                      window.open(rawUrl, '_blank');
+                    }
                   }}
                   className="w-full gradient-primary font-code uppercase tracking-wider text-sm h-12"
                 >
                   <Smartphone className="mr-2 h-5 w-5" />
-                  Iniciar Visor AR en Cámara
+                  Proyectar en tu Cámara (AR)
                 </Button>
               </div>
             ) : (
               <div className="space-y-4 text-center">
                 <div className="p-6 border-2 border-dashed border-primary/40 rounded-lg bg-secondary/30 flex flex-col items-center justify-center space-y-3">
-                  <div className="w-32 h-32 bg-white p-2 rounded-md shadow-inner flex items-center justify-center border border-border">
-                    <div className="w-full h-full border-2 border-dashed border-zinc-800 flex items-center justify-center text-[10px] font-code text-zinc-800 text-center font-bold">
-                      [ ESCANEAR CON LA CÁMARA DE TU CELULAR ]
-                    </div>
+                  <div className="w-36 h-36 bg-white p-2 rounded-md shadow-md flex items-center justify-center border border-border">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                      alt="QR Realidad Aumentada"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <p className="text-xs font-code text-primary uppercase tracking-wider font-semibold">
-                    Escanea el código QR con tu móvil
+                    Escanea el código QR con la cámara de tu celular
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Abre la cámara de tu teléfono Android o iPhone para proyectar esta pieza 3D en tu escritorio a escala real 1:1.
+                  Abre la cámara de tu teléfono para ver esta pieza proyectada a escala real en tu mesa o escritorio antes de comprar.
                 </p>
               </div>
             )}
