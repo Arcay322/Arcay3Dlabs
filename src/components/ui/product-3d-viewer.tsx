@@ -7,15 +7,14 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Product } from '@/lib/firebase/types';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   RotateCcw,
   Play,
   Pause,
-  Layers,
   Smartphone,
   Sparkles,
   CheckCircle,
+  X,
 } from 'lucide-react';
 import {
   Dialog,
@@ -40,7 +39,6 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
   let geo: THREE.BufferGeometry;
 
   if (cat.includes('decoración') || n.includes('jarrón') || n.includes('maceta') || n.includes('lámpara')) {
-    // Jarrón Cerámico Espiralado Suave (64 segmentos)
     const points: THREE.Vector2[] = [];
     for (let i = 0; i <= 30; i++) {
       const t = i / 30;
@@ -50,7 +48,6 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
     }
     geo = new THREE.LatheGeometry(points, 64);
   } else if (cat.includes('mecánico') || n.includes('engranaje') || n.includes('arduino') || n.includes('carcasa')) {
-    // Engranaje Mecánico de Precisión
     const shape = new THREE.Shape();
     const teeth = 16;
     const outerRadius = 7.5;
@@ -70,7 +67,6 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
       shape.lineTo(Math.cos(angle4) * innerRadius, Math.sin(angle4) * innerRadius);
     }
 
-    // Agujero eje central
     const holePath = new THREE.Path();
     holePath.absarc(0, 0, 2.2, 0, Math.PI * 2, true);
     shape.holes.push(holePath);
@@ -78,7 +74,6 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
     const extrudeSettings = { depth: 2.5, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.3, bevelThickness: 0.3 };
     geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   } else if (cat.includes('organizadores') || cat.includes('utilidades') || n.includes('soporte') || n.includes('celular') || n.includes('llaves')) {
-    // Soporte Ergonómico para Celular / Dock de Escritorio
     const shape = new THREE.Shape();
     shape.moveTo(-5, -4);
     shape.lineTo(5, -4);
@@ -90,23 +85,8 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
 
     const extrudeSettings = { depth: 7, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.4, bevelThickness: 0.4 };
     geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  } else if (cat.includes('arte') || cat.includes('juguetes') || n.includes('ajedrez') || n.includes('figura') || n.includes('busto')) {
-    // Pieza de Escultura / Torre de Ajedrez Elegante
-    const points: THREE.Vector2[] = [];
-    points.push(new THREE.Vector2(4.5, -7));
-    points.push(new THREE.Vector2(4.5, -5.5));
-    points.push(new THREE.Vector2(3.5, -4.5));
-    points.push(new THREE.Vector2(2.5, 0));
-    points.push(new THREE.Vector2(3.2, 3));
-    points.push(new THREE.Vector2(3.8, 4.5));
-    points.push(new THREE.Vector2(3.8, 6));
-    points.push(new THREE.Vector2(2.0, 6));
-    points.push(new THREE.Vector2(2.0, 7));
-    points.push(new THREE.Vector2(0, 7));
-    geo = new THREE.LatheGeometry(points, 48);
   } else {
-    // Dodecaedro Geodésico de Diseño
-    geo = new THREE.DodecahedronGeometry(6, 1);
+    geo = new THREE.IcosahedronGeometry(6, 4);
   }
 
   geo.center();
@@ -119,7 +99,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
   const controlsRef = useRef<OrbitControls | null>(null);
 
   const [autoRotate, setAutoRotate] = useState(true);
-  const [wireframeMode, setWireframeMode] = useState(false);
   const [showARDialog, setShowARDialog] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -142,14 +121,15 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     scene.background = new THREE.Color('#0d1117');
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    camera.position.set(0, 10, 24);
+    camera.lookAt(0, 0, 0);
 
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Limpiar contenedor e insertar canvas
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
@@ -160,9 +140,11 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 2.5;
     controls.maxPolarAngle = Math.PI / 2 + 0.1;
+    controls.target.set(0, 0, 0);
+    controls.saveState();
     controlsRef.current = controls;
 
-    // Luces de Estudio de Fotografía 3D
+    // Luces de Estudio
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
@@ -179,12 +161,11 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
     fillLight.position.set(0, -10, 15);
     scene.add(fillLight);
 
-    // Cama de impresión 3D (220x220 mm simulación)
+    // Cama de impresión 3D
     const gridHelper = new THREE.GridHelper(30, 15, 0xf97316, 0x334155);
     gridHelper.position.y = -7;
     scene.add(gridHelper);
 
-    // Color del material (variante seleccionada o naranja por defecto)
     const activeColor = colorHex || '#f97316';
 
     const createMeshFallback = () => {
@@ -193,7 +174,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
         color: new THREE.Color(activeColor),
         roughness: 0.35,
         metalness: 0.2,
-        wireframe: wireframeMode,
       });
 
       const mesh = new THREE.Mesh(geometry, meshMaterial);
@@ -202,12 +182,11 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
       scene.add(mesh);
     };
 
-    // Si el producto tiene una URL de modelo 3D (.glb o .stl) adjunta desde Ventify
+    // Cargar modelo personalizado si existe
     if (product.modelUrl) {
       const url = product.modelUrl.trim();
       const cleanUrl = url.split('?')[0].toLowerCase();
       const isStl = cleanUrl.endsWith('.stl') || url.toLowerCase().includes('.stl');
-      // Usar proxy del servidor para omitir bloqueos CORS del navegador en Firebase Storage
       const targetUrl = url.startsWith('http') ? `/api/model-proxy?url=${encodeURIComponent(url)}` : url;
 
       if (cleanUrl.endsWith('.glb') || cleanUrl.endsWith('.gltf') || url.toLowerCase().includes('.glb') || !isStl) {
@@ -217,29 +196,22 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
           (gltf) => {
             const model = gltf.scene;
             const bbox = new THREE.Box3().setFromObject(model);
-            const center = bbox.getCenter(new THREE.Vector3());
             const size = bbox.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
 
-            // Escalar modelo si es necesario para encajar bien en la escena
             if (maxDim > 0 && (maxDim < 2 || maxDim > 25)) {
               const scaleFactor = 12 / maxDim;
               model.scale.set(scaleFactor, scaleFactor, scaleFactor);
             }
 
-            // Re-calcular centro después de escalar
             const scaledBbox = new THREE.Box3().setFromObject(model);
             const scaledCenter = scaledBbox.getCenter(new THREE.Vector3());
             model.position.sub(scaledCenter);
 
-            // Respetar materiales y colores del AMS cargados en el GLB
             model.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-                if (wireframeMode && (child as THREE.Mesh).material) {
-                  ((child as THREE.Mesh).material as THREE.MeshStandardMaterial).wireframe = true;
-                }
               }
             });
 
@@ -247,7 +219,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
           },
           undefined,
           (err) => {
-            console.warn('No se pudo cargar el archivo GLB personalizado, usando vista previa:', err);
+            console.warn('No se pudo cargar GLB personalizado:', err);
             createMeshFallback();
           }
         );
@@ -262,7 +234,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
               color: new THREE.Color(activeColor),
               roughness: 0.35,
               metalness: 0.2,
-              wireframe: wireframeMode,
             });
             const mesh = new THREE.Mesh(geometry, meshMaterial);
             mesh.castShadow = true;
@@ -271,7 +242,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
           },
           undefined,
           (err) => {
-            console.warn('No se pudo cargar el archivo STL personalizado, usando vista previa:', err);
+            console.warn('No se pudo cargar STL personalizado:', err);
             createMeshFallback();
           }
         );
@@ -282,22 +253,14 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
       createMeshFallback();
     }
 
-    // Posición inicial de cámara
-    camera.position.set(18, 14, 24);
-    camera.lookAt(0, 0, 0);
-    controls.update();
-
-    // Bucle de animación 3D
     let animationFrameId: number;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      controls.autoRotate = autoRotate;
       controls.update();
       renderer.render(scene, camera);
     };
     animate();
 
-    // Resize handler
     const handleResize = () => {
       if (!containerRef.current) return;
       const w = containerRef.current.clientWidth;
@@ -317,17 +280,25 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [product, colorHex, wireframeMode, autoRotate]);
+  }, [product, colorHex, autoRotate]);
 
   const handleResetCamera = () => {
     if (controlsRef.current) {
       controlsRef.current.reset();
-      controlsRef.current.target.set(0, 0, 0);
     }
   };
 
   const handleOpenAR = () => {
-    setShowARDialog(true);
+    const rawUrl = product.modelUrl || window.location.href;
+    if (isMobile) {
+      if (/Android/i.test(navigator.userAgent)) {
+        window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(rawUrl)}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
+      } else {
+        window.open(rawUrl, '_blank');
+      }
+    } else {
+      setShowARDialog(true);
+    }
   };
 
   return (
@@ -337,14 +308,15 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
         <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
         {/* HUD Superior: Badge de 360° */}
-        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-md border border-border text-xs font-code flex items-center gap-2">
+        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-md border border-border text-xs font-code flex items-center gap-2 z-10">
           <Sparkles className="w-3.5 h-3.5 text-primary animate-spin" style={{ animationDuration: '6s' }} />
           <span className="font-bold text-foreground">VISOR 3D 360°</span>
         </div>
 
         {/* Botón de Realidad Aumentada (AR) */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 z-10">
           <Button
+            type="button"
             onClick={handleOpenAR}
             size="sm"
             className="gradient-primary font-code text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 hover:scale-105 transition-transform"
@@ -354,8 +326,8 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
           </Button>
         </div>
 
-        {/* HUD Inferior: Controles Interactivos */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+        {/* HUD Inferior: Controles Interactivos (Giro y Reset) */}
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
           <div className="flex items-center gap-1.5 pointer-events-auto bg-black/80 backdrop-blur-md p-1 rounded-md border border-border">
             {/* Auto-rotar Toggle */}
             <Button
@@ -367,18 +339,6 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
               title={autoRotate ? 'Pausar Rotación' : 'Girar 360°'}
             >
               {autoRotate ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-
-            {/* Wireframe / Capas Toggle */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={`h-8 w-8 ${wireframeMode ? 'text-primary' : 'text-white'} hover:text-primary`}
-              onClick={() => setWireframeMode(!wireframeMode)}
-              title="Modo Capas 3D Wireframe"
-            >
-              <Layers className="h-4 w-4" />
             </Button>
 
             {/* Reset Vista */}
@@ -400,63 +360,35 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
         </div>
       </div>
 
-      {/* Modal / Diálogo de Realidad Aumentada (AR) */}
+      {/* Modal / Diálogo de Realidad Aumentada (AR) para PC */}
       <Dialog open={showARDialog} onOpenChange={setShowARDialog}>
-        <DialogContent className="max-w-md bg-card border-layered">
+        <DialogContent className="max-w-md bg-card border-layered z-[100]">
           <DialogHeader>
             <DialogTitle className="font-headline text-2xl flex items-center gap-2">
               <Smartphone className="h-6 w-6 text-primary" />
               <span>Realidad Aumentada (AR)</span>
             </DialogTitle>
             <DialogDescription className="text-muted-foreground font-body">
-              Proyecta <strong>{product.name}</strong> a escala real en tu mesa o espacio físico antes de comprar.
+              Proyecta <strong>{product.name}</strong> a escala real en tu mesa o espacio físico.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            {isMobile ? (
-              <div className="space-y-3 text-center">
-                <div className="p-4 border border-primary/30 rounded-lg bg-primary/10 space-y-2">
-                  <CheckCircle className="h-8 w-8 text-primary mx-auto" />
-                  <p className="font-bold text-sm">¡Dispositivo Móvil Detectado!</p>
-                  <p className="text-xs text-muted-foreground">
-                    Haz clic a continuación para abrir la cámara e inspeccionar el objeto 3D en tu entorno real.
-                  </p>
-                </div>
-                <Button
-                  onClick={() => {
-                    const rawUrl = product.modelUrl || window.location.href;
-                    if (/Android/i.test(navigator.userAgent)) {
-                      window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(rawUrl)}&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;`;
-                    } else {
-                      window.open(rawUrl, '_blank');
-                    }
-                  }}
-                  className="w-full gradient-primary font-code uppercase tracking-wider text-sm h-12"
-                >
-                  <Smartphone className="mr-2 h-5 w-5" />
-                  Proyectar en tu Cámara (AR)
-                </Button>
+          <div className="space-y-4 py-2 text-center">
+            <div className="p-6 border-2 border-dashed border-primary/40 rounded-lg bg-secondary/30 flex flex-col items-center justify-center space-y-3">
+              <div className="w-36 h-36 bg-white p-2 rounded-md shadow-md flex items-center justify-center border border-border">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                  alt="QR Realidad Aumentada"
+                  className="w-full h-full object-contain"
+                />
               </div>
-            ) : (
-              <div className="space-y-4 text-center">
-                <div className="p-6 border-2 border-dashed border-primary/40 rounded-lg bg-secondary/30 flex flex-col items-center justify-center space-y-3">
-                  <div className="w-36 h-36 bg-white p-2 rounded-md shadow-md flex items-center justify-center border border-border">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
-                      alt="QR Realidad Aumentada"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <p className="text-xs font-code text-primary uppercase tracking-wider font-semibold">
-                    Escanea el código QR con la cámara de tu celular
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Abre la cámara de tu teléfono para ver esta pieza proyectada a escala real en tu mesa o escritorio antes de comprar.
-                </p>
-              </div>
-            )}
+              <p className="text-xs font-code text-primary uppercase tracking-wider font-semibold">
+                Escanea el código QR con la cámara de tu celular
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Abre la cámara de tu teléfono móvil para proyectar esta pieza a escala real 1:1 sobre tu escritorio.
+            </p>
           </div>
         </DialogContent>
       </Dialog>
