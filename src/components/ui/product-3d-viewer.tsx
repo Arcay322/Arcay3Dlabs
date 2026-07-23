@@ -27,6 +27,7 @@ import {
 interface Product3DViewerProps {
   product: Product;
   colorHex?: string;
+  slotColors?: string[];
 }
 
 /**
@@ -94,7 +95,7 @@ function createProceduralProductGeometry(category: string, name: string): THREE.
   return geo;
 }
 
-export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
+export function Product3DViewer({ product, colorHex, slotColors }: Product3DViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
 
@@ -208,29 +209,44 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
             const scaledCenter = scaledBbox.getCenter(new THREE.Vector3());
             model.position.sub(scaledCenter);
 
+            const uniqueMaterials: THREE.MeshStandardMaterial[] = [];
+
             model.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
 
-                // Si se selecciona un color de filamento en vivo y el modelo tiene material
-                if (colorHex && mesh.material) {
+                if (mesh.material) {
                   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
                   materials.forEach((m) => {
-                    if (m && (m as THREE.MeshStandardMaterial).color) {
-                      const mat = m as THREE.MeshStandardMaterial;
-                      const hsl = { h: 0, s: 0, l: 0 };
-                      mat.color.getHSL(hsl);
-                      // Preservar partes en negro puro (ojos, boca, detalles)
-                      if (hsl.l > 0.08) {
-                        mat.color.set(colorHex);
-                      }
+                    const mat = m as THREE.MeshStandardMaterial;
+                    if (mat && mat.color && !uniqueMaterials.includes(mat)) {
+                      uniqueMaterials.push(mat);
                     }
                   });
                 }
               }
             });
+
+            // Si hay ranuras de color personalizadas AMS (4 colores)
+            if (slotColors && slotColors.length > 0 && uniqueMaterials.length > 0) {
+              uniqueMaterials.forEach((mat, idx) => {
+                const hex = slotColors[idx % slotColors.length];
+                if (hex) {
+                  mat.color.set(hex);
+                }
+              });
+            } else if (colorHex && uniqueMaterials.length > 0) {
+              uniqueMaterials.forEach((mat) => {
+                const hsl = { h: 0, s: 0, l: 0 };
+                mat.color.getHSL(hsl);
+                // Preservar detalles negros puros
+                if (hsl.l > 0.08) {
+                  mat.color.set(colorHex);
+                }
+              });
+            }
 
             scene.add(model);
           },
@@ -297,7 +313,7 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [product, colorHex, autoRotate]);
+  }, [product, colorHex, JSON.stringify(slotColors), autoRotate]);
 
   const handleResetCamera = () => {
     if (controlsRef.current) {

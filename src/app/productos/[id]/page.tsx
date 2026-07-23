@@ -56,6 +56,16 @@ export default function ProductoPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedFilament, setSelectedFilament] = useState(PLA_FILAMENTS[0]);
+
+  // Estado para Personalización AMS 4 Colores (+50%)
+  const [isCustomAMS, setIsCustomAMS] = useState(false);
+  const [amsSlots, setAmsSlots] = useState([
+    PLA_FILAMENTS[0], // Ranura 1: Naranja
+    PLA_FILAMENTS[2], // Ranura 2: Blanco
+    PLA_FILAMENTS[1], // Ranura 3: Negro
+    PLA_FILAMENTS[3], // Ranura 4: Verde
+  ]);
+  const [activeSlot, setActiveSlot] = useState(0);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   useEffect(() => {
@@ -79,8 +89,11 @@ export default function ProductoPage() {
   // Stock disponible: de la variante o del producto
   const availableStock = selectedVariant ? selectedVariant.stock : (product?.stock || 0);
 
-  // Precio final: precio base + ajuste de variante
-  const finalPrice = product ? product.price + (selectedVariant?.priceAdjustment || 0) : 0;
+  // Cálculo de Precio: Base + Ajuste variante + (50% de recargo si es Personalizado AMS por lote único)
+  const basePrice = product ? product.price + (selectedVariant?.priceAdjustment || 0) : 0;
+  const amsSurcharge = isCustomAMS ? Math.round(basePrice * 0.5 * 100) / 100 : 0;
+  const finalPrice = basePrice + amsSurcharge;
+  const formattedPrice = formatPrice(finalPrice);
 
   const handleSelectVariant = (variant: ProductVariant) => {
     setSelectedVariant(variant);
@@ -91,7 +104,26 @@ export default function ProductoPage() {
   const handleAddToCart = () => {
     if (!product) return;
 
-    // Si el producto tiene variantes, se debe seleccionar una
+    // Si el usuario activó la Personalización Multicolor AMS (+50%)
+    if (isCustomAMS) {
+      const customTitle = `Personalización AMS (R1:${amsSlots[0].name}, R2:${amsSlots[1].name}, R3:${amsSlots[2].name}, R4:${amsSlots[3].name})`;
+      const customVariant: ProductVariant = {
+        id: `custom_ams_${Date.now()}`,
+        name: customTitle,
+        colorHex: amsSlots[0].hex,
+        images: displayImages,
+        stock: availableStock,
+        priceAdjustment: amsSurcharge + (selectedVariant?.priceAdjustment || 0),
+      };
+      addItem(product, quantity, customVariant);
+      toast({
+        title: '¡Pedido Personalizado AMS!',
+        description: `${quantity}x ${product.name} (Tirada Única +50%) agregado al carrito`,
+      });
+      return;
+    }
+
+    // Si el producto tiene variantes regulares, se debe seleccionar una
     if (product.variants && product.variants.length > 0 && !selectedVariant) {
       toast({
         title: 'Selecciona una variante',
@@ -157,8 +189,6 @@ export default function ProductoPage() {
     );
   }
 
-  const formattedPrice = formatPrice(finalPrice);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
       <div className="container mx-auto px-4 md:px-6 py-8">
@@ -208,7 +238,11 @@ export default function ProductoPage() {
 
             {/* Viewport: 2D Gallery vs 3D Interactive Viewer */}
             {viewMode === '3d' ? (
-              <Product3DViewer product={product} colorHex={selectedVariant?.colorHex || selectedFilament.hex} />
+              <Product3DViewer
+                product={product}
+                colorHex={!isCustomAMS ? (selectedVariant?.colorHex || selectedFilament.hex) : undefined}
+                slotColors={isCustomAMS ? amsSlots.map((s) => s.hex) : undefined}
+              />
             ) : (
               <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden rounded-lg">
                 <Image
@@ -319,62 +353,151 @@ export default function ProductoPage() {
 
             {/* Price */}
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Precio</p>
-              <p className="text-4xl font-bold gradient-text">{formattedPrice}</p>
-              {selectedVariant && selectedVariant.priceAdjustment !== 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Precio base: {formatPrice(product.price)} {selectedVariant.priceAdjustment > 0 ? '+' : ''}{formatPrice(selectedVariant.priceAdjustment)} por variante "{selectedVariant.name}"
+              <div className="flex items-baseline gap-3">
+                <p className="text-4xl font-bold gradient-text">{formattedPrice}</p>
+                {isCustomAMS && (
+                  <Badge variant="outline" className="border-primary/50 text-primary font-code text-xs">
+                    +50% Producción Única
+                  </Badge>
+                )}
+              </div>
+              {isCustomAMS ? (
+                <p className="text-xs text-primary font-code mt-1 font-semibold">
+                  ⚡ Incluye recargo del +50% ({formatPrice(amsSurcharge)}) por impresión individual y preparación personalizada de 4 canales en AMS.
                 </p>
+              ) : (
+                selectedVariant && selectedVariant.priceAdjustment !== 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Precio base: {formatPrice(product.price)} {selectedVariant.priceAdjustment > 0 ? '+' : ''}{formatPrice(selectedVariant.priceAdjustment)} por variante "{selectedVariant.name}"
+                  </p>
+                )
               )}
             </div>
 
-            {/* Selector de Color de Filamento PLA en Vivo */}
+            {/* Configurador de Color & Personalización AMS 4 Colores */}
             <Separator />
-            <div className="space-y-3 bg-secondary/30 p-4 border border-primary/30 rounded-lg">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-code uppercase text-primary font-bold tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                  COLOR DE FILAMENTO PLA (VISTA EN VIVO 3D)
-                </p>
-                <Badge variant="outline" className="text-[10px] font-code border-primary/40 text-primary">
-                  {selectedFilament.finish}
-                </Badge>
-              </div>
+            <div className="space-y-4">
+              {/* Card / Toggle para activar Personalizado AMS (+50%) */}
+              <div className={`p-4 border-2 rounded-lg transition-all ${isCustomAMS ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-border bg-secondary/20'}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                      <span className="font-code text-sm font-bold uppercase text-foreground">
+                        Personalizar 4 Colores AMS (+50%)
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Configura libremente las 4 ranuras de filamento de tu pieza en tiempo real. <strong>(+50% por tirada de impresión individual)</strong>.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextState = !isCustomAMS;
+                      setIsCustomAMS(nextState);
+                      if (nextState) setViewMode('3d');
+                    }}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isCustomAMS ? 'bg-primary' : 'bg-zinc-700'}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${isCustomAMS ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
 
-              <p className="text-xs text-muted-foreground">
-                Seleccionado: <strong className="text-foreground">{selectedFilament.name}</strong>
-              </p>
+                {/* Si la personalización AMS está activa, desplegar el seleccionador de 4 ranuras */}
+                {isCustomAMS ? (
+                  <div className="mt-4 pt-3 border-t border-primary/20 space-y-3 animate-fadeIn">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { label: 'R1: Cuerpo/Base', slot: 0 },
+                        { label: 'R2: Secundario', slot: 1 },
+                        { label: 'R3: Detalles', slot: 2 },
+                        { label: 'R4: Acentos', slot: 3 },
+                      ].map((s) => {
+                        const isActive = activeSlot === s.slot;
+                        const currentFil = amsSlots[s.slot];
+                        return (
+                          <button
+                            key={s.slot}
+                            type="button"
+                            onClick={() => setActiveSlot(s.slot)}
+                            className={`p-2 border rounded flex flex-col items-start gap-1 transition-all text-left ${isActive ? 'border-primary bg-primary/10 ring-1 ring-primary/30' : 'border-border bg-background hover:border-primary/50'}`}
+                          >
+                            <div className="flex items-center gap-1.5 w-full">
+                              <span className="w-3.5 h-3.5 rounded-full border border-black/30 shrink-0" style={{ backgroundColor: currentFil.hex }} />
+                              <span className="text-[11px] font-code font-bold truncate">{s.label}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground truncate w-full">{currentFil.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
 
-              <div className="flex flex-wrap gap-2.5 pt-1">
-                {PLA_FILAMENTS.map((fil) => {
-                  const isSelected = selectedFilament.id === fil.id;
-                  return (
-                    <button
-                      key={fil.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedFilament(fil);
-                        setViewMode('3d');
-                      }}
-                      className={`
-                        group relative w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center
-                        ${isSelected
-                          ? 'border-primary ring-2 ring-primary/40 scale-110 shadow-lg'
-                          : 'border-border/60 hover:border-primary/60 hover:scale-105'
-                        }
-                      `}
-                      title={`${fil.name} (${fil.finish})`}
-                    >
-                      <span
-                        className="w-full h-full rounded-full border border-black/20"
-                        style={{ backgroundColor: fil.hex }}
-                      />
-                      {isSelected && (
-                        <Check className={`absolute h-4 w-4 ${fil.hex === '#f4f4f5' ? 'text-black' : 'text-white'} drop-shadow-md`} />
-                      )}
-                    </button>
-                  );
-                })}
+                    {/* Paleta para la ranura activa */}
+                    <div className="p-3 bg-background rounded border border-border space-y-2">
+                      <p className="text-[11px] font-code text-muted-foreground uppercase">
+                        Filamento para <strong className="text-primary">Ranura {activeSlot + 1} ({['Cuerpo/Base', 'Secundario', 'Detalles', 'Acentos'][activeSlot]})</strong>:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {PLA_FILAMENTS.map((fil) => {
+                          const isSelected = amsSlots[activeSlot].id === fil.id;
+                          return (
+                            <button
+                              key={fil.id}
+                              type="button"
+                              onClick={() => {
+                                const newSlots = [...amsSlots];
+                                newSlots[activeSlot] = fil;
+                                setAmsSlots(newSlots);
+                                setViewMode('3d');
+                              }}
+                              className={`group relative w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-primary ring-2 ring-primary/40 scale-110' : 'border-border hover:scale-105'}`}
+                              title={`${fil.name} (${fil.finish})`}
+                            >
+                              <span className="w-full h-full rounded-full border border-black/20" style={{ backgroundColor: fil.hex }} />
+                              {isSelected && <Check className={`absolute h-4 w-4 ${fil.hex === '#f4f4f5' ? 'text-black' : 'text-white'} drop-shadow-md`} />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Modo Estándar: Selector de filamento principal */
+                  <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-code uppercase text-muted-foreground">
+                        FILAMENTO BASE: <strong className="text-foreground">{selectedFilament.name}</strong>
+                      </p>
+                      <Badge variant="outline" className="text-[10px] font-code border-border text-muted-foreground">
+                        {selectedFilament.finish}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {PLA_FILAMENTS.map((fil) => {
+                        const isSelected = selectedFilament.id === fil.id;
+                        return (
+                          <button
+                            key={fil.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFilament(fil);
+                              setViewMode('3d');
+                            }}
+                            className={`group relative w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-primary ring-2 ring-primary/40 scale-110' : 'border-border/60 hover:border-primary/60 hover:scale-105'}`}
+                            title={`${fil.name} (${fil.finish})`}
+                          >
+                            <span className="w-full h-full rounded-full border border-black/20" style={{ backgroundColor: fil.hex }} />
+                            {isSelected && <Check className={`absolute h-3.5 w-3.5 ${fil.hex === '#f4f4f5' ? 'text-black' : 'text-white'} drop-shadow-md`} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
