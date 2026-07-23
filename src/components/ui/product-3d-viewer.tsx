@@ -238,14 +238,15 @@ export function Product3DViewer({ product, colorHex, slotColors }: Product3DView
                 }
               });
             } else if (colorHex && uniqueMaterials.length > 0) {
-              uniqueMaterials.forEach((mat) => {
+              // Si se selecciona una variante de Ventify con colorHex, cambiar solo el material principal
+              const primaryMat = uniqueMaterials.find((mat) => {
                 const hsl = { h: 0, s: 0, l: 0 };
                 mat.color.getHSL(hsl);
-                // Preservar detalles negros puros
-                if (hsl.l > 0.08) {
-                  mat.color.set(colorHex);
-                }
+                return hsl.l > 0.08;
               });
+              if (primaryMat) {
+                primaryMat.color.set(colorHex);
+              }
             }
 
             scene.add(model);

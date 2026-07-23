@@ -240,7 +240,7 @@ export default function ProductoPage() {
             {viewMode === '3d' ? (
               <Product3DViewer
                 product={product}
-                colorHex={!isCustomAMS ? (selectedVariant?.colorHex || selectedFilament.hex) : undefined}
+                colorHex={!isCustomAMS ? selectedVariant?.colorHex : undefined}
                 slotColors={isCustomAMS ? amsSlots.map((s) => s.hex) : undefined}
               />
             ) : (
@@ -407,7 +407,7 @@ export default function ProductoPage() {
                 </div>
 
                 {/* Si la personalización AMS está activa, desplegar el seleccionador de 4 ranuras */}
-                {isCustomAMS ? (
+                {isCustomAMS && (
                   <div className="mt-4 pt-3 border-t border-primary/20 space-y-3 animate-fadeIn">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
@@ -462,39 +462,6 @@ export default function ProductoPage() {
                           );
                         })}
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Modo Estándar: Selector de filamento principal */
-                  <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-code uppercase text-muted-foreground">
-                        FILAMENTO BASE: <strong className="text-foreground">{selectedFilament.name}</strong>
-                      </p>
-                      <Badge variant="outline" className="text-[10px] font-code border-border text-muted-foreground">
-                        {selectedFilament.finish}
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {PLA_FILAMENTS.map((fil) => {
-                        const isSelected = selectedFilament.id === fil.id;
-                        return (
-                          <button
-                            key={fil.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedFilament(fil);
-                              setViewMode('3d');
-                            }}
-                            className={`group relative w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-primary ring-2 ring-primary/40 scale-110' : 'border-border/60 hover:border-primary/60 hover:scale-105'}`}
-                            title={`${fil.name} (${fil.finish})`}
-                          >
-                            <span className="w-full h-full rounded-full border border-black/20" style={{ backgroundColor: fil.hex }} />
-                            {isSelected && <Check className={`absolute h-3.5 w-3.5 ${fil.hex === '#f4f4f5' ? 'text-black' : 'text-white'} drop-shadow-md`} />}
-                          </button>
-                        );
-                      })}
                     </div>
                   </div>
                 )}
