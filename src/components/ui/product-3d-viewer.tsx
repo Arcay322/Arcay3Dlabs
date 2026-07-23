@@ -210,8 +210,25 @@ export function Product3DViewer({ product, colorHex }: Product3DViewerProps) {
 
             model.traverse((child) => {
               if ((child as THREE.Mesh).isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
+                const mesh = child as THREE.Mesh;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                // Si se selecciona un color de filamento en vivo y el modelo tiene material
+                if (colorHex && mesh.material) {
+                  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                  materials.forEach((m) => {
+                    if (m && (m as THREE.MeshStandardMaterial).color) {
+                      const mat = m as THREE.MeshStandardMaterial;
+                      const hsl = { h: 0, s: 0, l: 0 };
+                      mat.color.getHSL(hsl);
+                      // Preservar partes en negro puro (ojos, boca, detalles)
+                      if (hsl.l > 0.08) {
+                        mat.color.set(colorHex);
+                      }
+                    }
+                  });
+                }
               }
             });
 

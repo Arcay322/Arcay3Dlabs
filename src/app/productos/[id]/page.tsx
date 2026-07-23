@@ -28,9 +28,21 @@ import {
   Box,
   Check,
   Eye,
+  Sparkles,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import type { Product, ProductVariant } from '@/lib/firebase/types';
+
+const PLA_FILAMENTS = [
+  { id: 'naranja', name: 'Naranja Incandescente', hex: '#f97316', finish: 'Mate' },
+  { id: 'negro', name: 'Negro Carbón', hex: '#18181b', finish: 'Mate' },
+  { id: 'blanco', name: 'Blanco Marfil', hex: '#f4f4f5', finish: 'Mate' },
+  { id: 'verde', name: 'Verde Neón', hex: '#22c55e', finish: 'Mate' },
+  { id: 'azul', name: 'Azul Eléctrico', hex: '#3b82f6', finish: 'Mate' },
+  { id: 'rojo', name: 'Rojo Pasión', hex: '#ef4444', finish: 'Mate' },
+  { id: 'dorado', name: 'Seda Dorado', hex: '#eab308', finish: 'Seda' },
+  { id: 'plata', name: 'Seda Plata', hex: '#94a3b8', finish: 'Seda' },
+];
 
 export default function ProductoPage() {
   const params = useParams();
@@ -43,6 +55,7 @@ export default function ProductoPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [selectedFilament, setSelectedFilament] = useState(PLA_FILAMENTS[0]);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   useEffect(() => {
@@ -195,7 +208,7 @@ export default function ProductoPage() {
 
             {/* Viewport: 2D Gallery vs 3D Interactive Viewer */}
             {viewMode === '3d' ? (
-              <Product3DViewer product={product} colorHex={selectedVariant?.colorHex} />
+              <Product3DViewer product={product} colorHex={selectedVariant?.colorHex || selectedFilament.hex} />
             ) : (
               <div className="aspect-square w-full border-2 border-border bg-muted relative group overflow-hidden rounded-lg">
                 <Image
@@ -281,22 +294,24 @@ export default function ProductoPage() {
                   </span>
                 )}
               </div>
-              <h1 className="font-headline text-3xl md:text-5xl font-bold mb-2 tracking-tight uppercase">
+              <h1 className="font-headline text-3xl sm:text-4xl font-bold tracking-tight mb-2">
                 {product.name}
               </h1>
 
-              {/* Rating - Mock for now */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                        }`}
+                      className={`h-4 w-4 ${
+                        i < 4 ? 'text-primary fill-primary' : 'text-muted-foreground'
+                      }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">(4.0) · 12 reseñas</span>
+                <span className="text-sm text-muted-foreground font-code">
+                  (4.0) · 12 reseñas
+                </span>
               </div>
             </div>
 
@@ -311,6 +326,56 @@ export default function ProductoPage() {
                   Precio base: {formatPrice(product.price)} {selectedVariant.priceAdjustment > 0 ? '+' : ''}{formatPrice(selectedVariant.priceAdjustment)} por variante "{selectedVariant.name}"
                 </p>
               )}
+            </div>
+
+            {/* Selector de Color de Filamento PLA en Vivo */}
+            <Separator />
+            <div className="space-y-3 bg-secondary/30 p-4 border border-primary/30 rounded-lg">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-code uppercase text-primary font-bold tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  COLOR DE FILAMENTO PLA (VISTA EN VIVO 3D)
+                </p>
+                <Badge variant="outline" className="text-[10px] font-code border-primary/40 text-primary">
+                  {selectedFilament.finish}
+                </Badge>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Seleccionado: <strong className="text-foreground">{selectedFilament.name}</strong>
+              </p>
+
+              <div className="flex flex-wrap gap-2.5 pt-1">
+                {PLA_FILAMENTS.map((fil) => {
+                  const isSelected = selectedFilament.id === fil.id;
+                  return (
+                    <button
+                      key={fil.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilament(fil);
+                        setViewMode('3d');
+                      }}
+                      className={`
+                        group relative w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center
+                        ${isSelected
+                          ? 'border-primary ring-2 ring-primary/40 scale-110 shadow-lg'
+                          : 'border-border/60 hover:border-primary/60 hover:scale-105'
+                        }
+                      `}
+                      title={`${fil.name} (${fil.finish})`}
+                    >
+                      <span
+                        className="w-full h-full rounded-full border border-black/20"
+                        style={{ backgroundColor: fil.hex }}
+                      />
+                      {isSelected && (
+                        <Check className={`absolute h-4 w-4 ${fil.hex === '#f4f4f5' ? 'text-black' : 'text-white'} drop-shadow-md`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Variant Selector */}
@@ -366,6 +431,7 @@ export default function ProductoPage() {
               </>
             )}
 
+            <Separator />
             <Separator />
 
             {/* Quantity Selector - Control Panel Style */}
